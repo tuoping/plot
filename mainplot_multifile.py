@@ -6,7 +6,9 @@ from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
-    labellist = ["100K", "200K", "300K", "400K"]
+    # labellist = ["100K", "200K", "300K", "400K"]
+    labellist = ["sys4", "sys5", "sys6", "sys7"]
+    # labellist = ["sys0", "sys1", "sys2", "sys3"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
@@ -48,7 +50,7 @@ if __name__ == "__main__":
         print("\n")
         for i in range(num_y):
             form = assignformat[formatindicator]
-            addline(x[i_file],y[i_file][i], form[ptr], labellist[i], formatindicator=formatindicator)
+            addline(x[i_file],y[i_file][i], form[ptr], labellist[i_file], formatindicator=formatindicator)
             ptr += 1
     
     maxxlist = []

@@ -57,6 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('INPUT', type=str,
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
+    parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -73,7 +74,7 @@ if __name__ == "__main__":
     if skip_first_line:
         context.pop(0)
 
-    x, y = readcontext(context)
+    x, y = readcontext(context, num_y = num_y, skip_y = skip_y)
     
     print(x)
     for yi in y:
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     
     
     max_x, min_x = getmaxmin(x)
-    max_y, min_y = getmaxmin(y, dim=2)
+    max_y, min_y = getmaxmin(y)
     print((min_x, min_y))
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(0, 1, 0.4) + min_x
@@ -93,7 +94,8 @@ if __name__ == "__main__":
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
     # add diagonal line
-    plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
+    if args.diagonal_line:
+        plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     
     plt.savefig("fig")
     plt.show()
