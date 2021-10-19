@@ -1,12 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from formatlist import assignformat
 from copy import deepcopy
+import os,sys
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+from formatlist import assignformat
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], s=10, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], label=label)
     elif formatindicator == "line":
@@ -14,14 +19,14 @@ def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
 
 
 def setfigform(xtickList, ytickList, xlabel, ylabel, title = ""):
-    plt.subplots_adjust(left=0.15, right=0.9, top=0.9, bottom=0.15)
+    plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.15)
     plt.legend()
     plt.title(title,fontsize = 16)
     plt.xlabel(xlabel,fontsize = 14)
     plt.ylabel(ylabel, fontsize = 14)
-    plt.xticks( xtickList )
-    plt.yticks( ytickList )
-    plt.tick_params(axis='both',width=2,labelsize = 14)
+    plt.xticks( xtickList)
+    plt.yticks( ytickList)
+    plt.tick_params(axis='both',width=2,labelsize = 12)
     
 
 def getmaxmin(data, dtype = float):
@@ -45,7 +50,7 @@ def readcontext(context, num_y=1, skip_y=0):
     return x,y
 
 if __name__ == "__main__":
-    labellist = ["100K", "200K", "300K", "400K"]
+    labellist = ["500K", "600K", "700K", "800K"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
@@ -89,7 +94,7 @@ if __name__ == "__main__":
     max_y, min_y = getmaxmin(y)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1, 0.4) + min_x
+    xtickList = (max_x-min_x) * np.arange(0, 1, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(0, 1, 0.2) + min_y
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
