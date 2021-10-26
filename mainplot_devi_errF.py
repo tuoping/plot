@@ -27,7 +27,7 @@ def readcondidate(context, num_y=1, skip_y=0):
 
 if __name__ == "__main__":
     # labellist = ["100K", "200K", "300K", "400K"]
-    labellist = ["sys4", "sys5", "sys6", "sys7"]
+    labellist = ["sys6", "sys7"]
     # labellist = ["sys0", "sys1", "sys2", "sys3"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
@@ -40,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument('INPUT', type=str, nargs = "+",
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
+    parser.add_argument("--natom", type=int, default=1, help="Number of atoms, E_per_atom = E_tot/natom")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     
     # x = []
     y = []
-    natom = 24
+    natom = args.natom
     for f in inputfile:
         fin = open(f, "r")
         context = fin.readlines()
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         # x1 = []
         y1 = []
         idata = 0
+        assert(len(x0)%natom == 0)
         for iconf in range(0, int(len(x0)/natom)):
             y_max = 0.0
             for iatom in range(natom):
@@ -77,7 +79,7 @@ if __name__ == "__main__":
         # x.append(x1)
         y.append(y1)
 
-    candidatefile = ["candidate.shuffled.004.out", "candidate.shuffled.005.out", "candidate.shuffled.006.out", "candidate.shuffled.007.out"]
+    candidatefile = ["candidate.shuffled.006.out", "candidate.shuffled.007.out"]
     xc = []
     yc = []
     for ifile in range(len(candidatefile)):
@@ -88,8 +90,9 @@ if __name__ == "__main__":
         x0, y0 = readcondidate(context, num_y=1)
         _xc = []
         _yc = []
-        print(len(x0))
-        for idx_x0 in range(min(len(x0), 100)):
+        print("Num_of_candidates: ",len(x0))
+        print("DeltaF_modeldev", "DeltaF_DP_DFT", "Configure_idx")
+        for idx_x0 in range(min(len(x0), len(y[ifile]))):
             _x0 = x0[idx_x0]
             x1 = os.path.join(os.path.join("../../", _x0), "model_devi.out")
      
@@ -101,8 +104,7 @@ if __name__ == "__main__":
             yc1 = yc0[0][idx_candidate]
             _xc.append(y[ifile][idx_x0])
             _yc.append(yc1)
-            if y[ifile][idx_x0] < yc1:
-                print(y[ifile][idx_x0], yc1, y0[0][idx_x0])
+            print(y[ifile][idx_x0], yc1, y0[0][idx_x0])
         xc.append(_xc)
         yc.append(_yc)
 
