@@ -50,7 +50,8 @@ def readcontext(context, num_y=1, skip_y=0):
     return x,y
 
 if __name__ == "__main__":
-    labellist = ["500K", "600K", "700K", "800K"]
+    # labellist = ["500K", "600K", "700K", "800K"]
+    labellist = ["HuTaiPing", "TuoPing"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
