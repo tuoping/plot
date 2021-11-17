@@ -27,7 +27,7 @@ def readcondidate(context, num_y=1, skip_y=0):
 
 if __name__ == "__main__":
     # labellist = ["100K", "200K", "300K", "400K"]
-    labellist = ["sys6", "sys7"]
+    labellist = ["sys4", "sys5", "sys6", "sys7"]
     # labellist = ["sys0", "sys1", "sys2", "sys3"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         # x.append(x1)
         y.append(y1)
 
-    candidatefile = ["candidate.shuffled.006.out", "candidate.shuffled.007.out"]
+    candidatefile = ["candidate.shuffled.004.out", "candidate.shuffled.005.out", "candidate.shuffled.006.out", "candidate.shuffled.007.out"]
     xc = []
     yc = []
     for ifile in range(len(candidatefile)):

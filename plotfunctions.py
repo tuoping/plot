@@ -9,18 +9,23 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from formatlist import assignformat
 
+def drawHist(heights,hnum):
+	pyplot.hist(heights, hnum, align='mid',range=(0,1))
+
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], s=3, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], label=label)
     elif formatindicator == "line":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
+    elif formatindicator == "hist":
+	    pyplot.hist(x, y, align='mid',range=(0,1))
 
 
 def setfigform(xtickList, ytickList, xlabel, ylabel, title = ""):
     plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.15)
-    plt.legend()
+    #plt.legend()
     plt.title(title,fontsize = 16)
     plt.xlabel(xlabel,fontsize = 14)
     plt.ylabel(ylabel, fontsize = 14)
@@ -50,7 +55,8 @@ def readcontext(context, num_y=1, skip_y=0):
     return x,y
 
 if __name__ == "__main__":
-    labellist = ["500K", "600K", "700K", "800K"]
+    #labellist = ["500K", "600K", "700K", "800K"]
+    labellist = ["alpha-lT", "alpha-hT", "delta2-lT", "delta2-hT"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
