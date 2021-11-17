@@ -13,7 +13,7 @@ def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
         plt.scatter(x,y,c=form["c"], s=10, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], markersize=3, label=label)
+        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], label=label)
     elif formatindicator == "line":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
 
@@ -36,15 +36,17 @@ def getmaxmin(data, dtype = float):
     return max_data, min_data
 
 def readcontext(context, num_y=1, skip_y=0, skiprows=0):
-    c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
+    c_ = np.loadtxt(context, skiprows=skiprows)
     c = np.transpose(c_)
-    x = c[0].astype(np.float)
-    y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
+    #x = c[0]
+    #y = c[skip_y:skip_y+num_y]
+    print(c)
+    x = np.arange(np.shape(c)[1])*0.002+0.8
+    y = c[skip_y:skip_y+num_y]
     return x,y
 
 if __name__ == "__main__":
-    # labellist = ["500K", "600K", "700K", "800K"]
-    labellist = ["HuTaiPing", "TuoPing"]
+    labellist = ["solid", "liquid"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
@@ -76,8 +78,9 @@ if __name__ == "__main__":
     # x, y = readcontext(context, num_y = num_y, skip_y = skip_y)
     x, y = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
     
+    print("x=")
     print(x)
-    print(y)
+    print("y=")
     for yi in y:
         print(yi)
     print("\n")
