@@ -7,7 +7,8 @@ from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 if __name__ == "__main__":
     # labellist = ["100K", "200K", "300K", "400K"]
-    labellist = ["sys4", "sys5", "sys6", "sys7"]
+    #labellist = ["alpha"]
+    labellist = ["delta-hT"]
     # labellist = ["sys0", "sys1", "sys2", "sys3"]
 
     parser = argparse.ArgumentParser(description='Figure texts')
@@ -43,10 +44,14 @@ if __name__ == "__main__":
         x1 = []
         y1 = []
         for idata in range(len(x0)):
-            x_ = np.sqrt(x0[idata]*x0[idata] + y0[0][idata]*y0[0][idata] + y0[1][idata]*y0[1][idata]) 
-            y_ = np.sqrt(y0[2][idata]*y0[2][idata] + y0[3][idata]*y0[3][idata] + y0[4][idata]*y0[4][idata]) 
-            x1.append(x_)
-            y1.append(y_)
+            #x_ = np.sqrt(x0[idata]*x0[idata] + y0[0][idata]*y0[0][idata] + y0[1][idata]*y0[1][idata]) 
+            #y_ = np.sqrt(y0[2][idata]*y0[2][idata] + y0[3][idata]*y0[3][idata] + y0[4][idata]*y0[4][idata]) 
+            x1.append(x0[idata])
+            y1.append(y0[2][idata])
+            x1.append(y0[0][idata])
+            y1.append(y0[3][idata])
+            x1.append(y0[1][idata])
+            y1.append(y0[4][idata])
         x.append(x1)
         y.append(y1)
 
@@ -77,7 +82,7 @@ if __name__ == "__main__":
     min_y = min(minylist)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1, 0.4) + min_x
+    xtickList = (max_x-min_x) * np.arange(0, 1, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(0, 1, 0.2) + min_y
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
