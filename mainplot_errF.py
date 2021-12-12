@@ -6,11 +6,8 @@ from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
-    # labellist = ["100K", "200K", "300K", "400K"]
-    #labellist = ["alpha"]
-    labellist = ["delta-hT"]
-    # labellist = ["sys0", "sys1", "sys2", "sys3"]
 
+    labellist = [" ", " ", " ", " ", " "]
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
@@ -55,15 +52,6 @@ if __name__ == "__main__":
         x.append(x1)
         y.append(y1)
 
-    ptr = 0
-    for i_file in range(len(x)):
-        # print(x[i_file])
-        # for yi in y[i_file]:
-        #     print(yi)
-        # print("\n")
-        form = assignformat[formatindicator]
-        addline(x[i_file],y[i_file], form[ptr], labellist[i_file], formatindicator=formatindicator)
-        ptr += 1
     
     maxxlist = []
     minxlist = []
@@ -82,13 +70,24 @@ if __name__ == "__main__":
     min_y = min(minylist)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1, 0.2) + min_x
-    ytickList = (max_y-min_y) * np.arange(0, 1, 0.2) + min_y
+    xtickList = (max_x-min_x) * np.arange(0, 1.3, 0.3) + min_x
+    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
+
+    plt.figure(figsize=(5,5))
+    ptr = 0
+    for i_file in range(len(x)):
+        # print(x[i_file])
+        # for yi in y[i_file]:
+        #     print(yi)
+        # print("\n")
+        form = assignformat[formatindicator]
+        addline(x[i_file],y[i_file], form[ptr], labellist[i_file], formatindicator=formatindicator)
+        ptr += 1
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
     # add diagonal line
     plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     
-    plt.savefig("fig")
+    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
     plt.show()
     

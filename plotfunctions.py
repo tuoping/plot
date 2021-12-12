@@ -22,16 +22,37 @@ def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     elif formatindicator == "hist":
 	    pyplot.hist(x, y, align='mid',range=(0,1))
 
+def startfig(size = (5,5)):
+    plt.rcParams["figure.figsize"] = size
+    plt.rcParams['axes.linewidth'] =2.0
+    plt.rcParams['xtick.major.width'] =2.0
+    plt.rcParams['ytick.major.width'] =2.0
 
-def setfigform(xtickList, ytickList, xlabel, ylabel, title = ""):
-    plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.15)
-    #plt.legend()
-    plt.title(title,fontsize = 16)
-    plt.xlabel(xlabel,fontsize = 14)
-    plt.ylabel(ylabel, fontsize = 14)
-    plt.xticks( xtickList)
-    plt.yticks( ytickList)
-    plt.tick_params(axis='both',width=2,labelsize = 12)
+def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None):
+    #plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.15)
+    plt.legend(fontsize = 16, frameon=False)
+    #plt.title(title,fontsize = 16)
+    #plt.xlabel(xlabel,fontsize = 18)
+    #plt.ylabel(ylabel, fontsize = 18)
+    font={'family':'Times New Roman',
+          # 'style':'italic',  # 斜体
+          'weight':'normal',
+          # 'color':'red',
+          'size': 16
+    }
+    plt.title(title)
+    plt.xlabel(xlabel, fontsize = font["size"])
+    plt.ylabel(ylabel, fontsize = font["size"])
+    xtickround = np.round(xtickList, 3)
+    ytickround = np.round(ytickList, 3)
+    print(ytickround)
+    plt.xticks( xtickround, fontsize = font["size"])
+    plt.yticks( ytickround, fontsize = font["size"])
+    if xlimit is not None:
+        plt.xlim(xlimit)
+    if ylimit is not None:
+        plt.ylim(ylimit)
+    plt.tick_params(direction="in")
     
 
 def getmaxmin(data, dtype = float):
@@ -48,8 +69,8 @@ def readcontext(context, num_y=1, skip_y=0, skiprows=0):
     return x,y
 
 if __name__ == "__main__":
-    labellist = ["alpha-lT", "alpha-hT", "delta2-lT", "delta2-hT"]
 
+    labellist = [" ", " ", " ", " ", " "]
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
@@ -61,6 +82,8 @@ if __name__ == "__main__":
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
+    parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
+    parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -74,29 +97,38 @@ if __name__ == "__main__":
     
     fin = open(inputfile, "r")
     x, y = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
+
     
     print(x)
     print(y)
     for yi in y:
         print(yi)
     print("\n")
-    for i in range(num_y):
-        form = assignformat[formatindicator]
-        addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
     
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1, 0.2) + min_x
-    ytickList = (max_y-min_y) * np.arange(0, 1, 0.2) + min_y
+    xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
+    #xtickList = np.arange(50, 550, 50)
+    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
+    startfig((8,6))
+
+    for i in range(num_y):
+        form = assignformat[formatindicator]
+        addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     
-    plt.savefig("fig")
+    if args.logx:
+        plt.semilogx()
+    if args.logy:
+        plt.semilogy()
+    
+    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
     plt.show()
     
