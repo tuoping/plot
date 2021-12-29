@@ -1,11 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from formatlist import assignformat
-from plotfunctions import addline, setfigform, getmaxmin, readcontext, bold_axis_and_ticks, plot_error_distribution
 import seaborn as sns
+from copy import deepcopy
+import os,sys
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
+from formatlist import assignformat
+from plotfunctions import addline, setfigform, getmaxmin, readcontext, bold_axis_and_ticks, plot_error_distribution, startfig
 
 if __name__ == "__main__":
 
@@ -23,37 +27,41 @@ if __name__ == "__main__":
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
+    parser.add_argument('--natom', type=str, default="1.0", help='y/natom')
     args = parser.parse_args()
     
     formatindicator = args.format
     
     inputfile = args.INPUT
     
-    # num_y = args.num_y
-    num_y = 5
+    num_y = args.num_y
     skiprows = args.skiprows
     skip_y = args.skip
+    if args.natom == "1.0":
+        natom=np.ones(len(inputfile))
+    else:
+        natom = [float(a) for a in args.natom.split(",")]
     
     
     x = []
     y = []
-    for f in inputfile:
+    for i_file in range(len(inputfile)):
+        f = inputfile[i_file]
         fin = open(f, "r")
-        x0, y0 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
-        x1 = []
-        y1 = []
-        for idata in range(len(x0)):
-            #x_ = np.sqrt(x0[idata]*x0[idata] + y0[0][idata]*y0[0][idata] + y0[1][idata]*y0[1][idata]) 
-            #y_ = np.sqrt(y0[2][idata]*y0[2][idata] + y0[3][idata]*y0[3][idata] + y0[4][idata]*y0[4][idata]) 
-            x1.append(x0[idata])
-            y1.append(y0[2][idata])
-            x1.append(y0[0][idata])
-            y1.append(y0[3][idata])
-            x1.append(y0[1][idata])
-            y1.append(y0[4][idata])
+        x1, y1 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
+        x1 = np.array(x1)/natom[i_file]
+        y1 = np.array(y1)/natom[i_file]
         x.append(x1)
-        y.append(y1)
+        y.append(y1[0])
 
+    
+    for xi in x:
+        print(len(xi))
+    print("\n")
+    for yi in y:
+        print(len(yi))
+    print("\n")
+    
     
     maxxlist = []
     minxlist = []
@@ -72,8 +80,9 @@ if __name__ == "__main__":
     min_y = min(minylist)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1.3, 0.3) + min_x
-    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
+    max_ = max(max_x, max_y)
+    min_ = min(min_x, min_y)
+    xtickList = (max_-min_) * np.arange(0, 1.3, 0.3) + min_
 
     plt.figure(figsize=(5,5))
     ptr = 0
@@ -86,17 +95,17 @@ if __name__ == "__main__":
         addline(x[i_file],y[i_file], form[ptr], labellist[i_file], formatindicator=formatindicator)
         ptr += 1
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
+    setfigform(xtickList, xtickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title, xlimit=(min_,max_), ylimit=(min_,max_))
     # add diagonal line
     if args.diagonal_line:
-        plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
+        plt.plot((min_, max_), (min_, max_), ls="--", c="k")
     
     if args.logx:
         plt.semilogx()
     if args.logy:
         plt.semilogy()
     
-    plt.savefig("fig", bbox_inches = "tight")
+    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
     plt.show()
     
     from sklearn.metrics import mean_squared_error, r2_score
