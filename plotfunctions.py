@@ -1,26 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-import seaborn as sns
 from copy import deepcopy
 import os,sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from formatlist import assignformat
+from formatlist import generateformat
 
-def plot_error_distribution(data_x, data_y, title=""):
-    fig = plt.figure()
-    axes = fig.add_subplot()
-    energy_error = np.array(data_x) - np.array(data_y)
-    sns.distplot(energy_error, hist=True, kde=True, bins=20, fit_kws=dict(linewidth=2.5))
-    bold_axis_and_ticks(axes)
-    axes.set_title("%s"%title, fontsize=20, fontweight="bold")
-    return plt
 
-def drawHist(heights,hnum,bounds):
-	plt.hist(heights, hnum, align='mid',range=bounds)
+def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
+    plt.hist(heights, hnum, align='mid',range=bounds)
+    plt.title(title)
+    plt.xlabel(xlabel, fontsize = 16)
+    plt.ylabel(ylabel, fontsize = 16)
+    plt.tick_params(direction="in")
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
@@ -53,9 +48,8 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     plt.title(title)
     plt.xlabel(xlabel, fontsize = font["size"])
     plt.ylabel(ylabel, fontsize = font["size"])
-    xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 2)
-    print(ytickround)
+    xtickround = np.round(xtickList, 3)
+    ytickround = np.round(ytickList, 3)
     plt.xticks( xtickround, fontsize = font["size"])
     plt.yticks( ytickround, fontsize = font["size"])
     if xlimit is not None:
@@ -63,17 +57,6 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     if ylimit is not None:
         plt.ylim(ylimit)
     plt.tick_params(direction="in")
-
-def bold_axis_and_ticks(ax, x_label='', y_label='', linewidth=2, size=16):
-    labels = ax.get_xticklabels() + ax.get_yticklabels()
-    [label.set_fontweight('bold') for label in labels]
-    ax.set_xlabel(x_label, fontsize=size, fontweight='bold')
-    ax.set_ylabel(y_label, fontsize=size, fontweight='bold')
-    ax.spines['bottom'].set_linewidth(2)
-    ax.spines['top'].set_linewidth(2)
-    ax.spines['left'].set_linewidth(2)
-    ax.spines['right'].set_linewidth(2)
-    return ax
     
 
 def getmaxmin(data, dtype = float):
@@ -91,7 +74,6 @@ def readcontext(context, num_y=1, skip_y=0, skiprows=0):
 
 if __name__ == "__main__":
 
-    labellist = [" ", " ", " ", " ", " "]
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
@@ -134,13 +116,15 @@ if __name__ == "__main__":
     xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
     #xtickList = np.arange(50, 550, 50)
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
-    startfig((8,6))
+    startfig((5,5))
 
+    labellist = [" " for i in range(len(y))]
+    assignformat = generateformat(len(y))
     for i in range(num_y):
         form = assignformat[formatindicator]
         addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
+    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
@@ -150,6 +134,6 @@ if __name__ == "__main__":
     if args.logy:
         plt.semilogy()
     
-    plt.savefig("fig", bbox_inches = "tight")
+    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
     plt.show()
     

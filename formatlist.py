@@ -1,5 +1,36 @@
 from copy import deepcopy
+from matplotlib.pyplot import cm
+import numpy as np
 
+def generateformat(n):
+    colorlist = cm.rainbow(np.linspace(0, 1, n))
+
+    #dotformatlist
+    #dotformatlist = deepcopy(colorlist)
+    dotformatlist = []
+    for c in colorlist:
+        dotformatlist.append({"c": c})
+    for f in dotformatlist:
+        f["marker"] = "o"
+    
+    #lineformatlist
+    #lineformatlist = deepcopy(colorlist)
+    lineformatlist = []
+    for c in colorlist:
+        lineformatlist.append({"c": c})
+    for f in lineformatlist:
+        f["linestyle"]="-"
+    
+    #linedotformatlist
+    linedotformatlist = deepcopy(dotformatlist)
+    for f in linedotformatlist:
+        f['linestyle']="-"
+    
+    
+    assignformat = {"dot": dotformatlist, "line-dot": linedotformatlist, "line": lineformatlist}
+    return assignformat
+
+'''
 colorlist = []
 formatdict = {'c':"r"}
 colorlist.append(formatdict)
@@ -19,21 +50,4 @@ formatdict = {'c':"lime"}
 colorlist.append(formatdict)
 formatdict = {'c':"turquoise"}
 colorlist.append(formatdict)
-
-#dotformatlist
-dotformatlist = deepcopy(colorlist)
-for f in dotformatlist:
-    f["marker"] = "o"
-
-#lineformatlist
-lineformatlist = deepcopy(colorlist)
-for f in lineformatlist:
-    f["linestyle"]="-"
-
-#linedotformatlist
-linedotformatlist = deepcopy(dotformatlist)
-for f in linedotformatlist:
-    f['linestyle']="-"
-
-
-assignformat = {"dot": dotformatlist, "line-dot": linedotformatlist, "line": lineformatlist}
+'''

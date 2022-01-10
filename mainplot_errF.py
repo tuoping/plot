@@ -2,9 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 from formatlist import assignformat
-from plotfunctions import addline, setfigform, getmaxmin, readcontext, bold_axis_and_ticks, plot_error_distribution
-import seaborn as sns
-
+from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
@@ -13,16 +11,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
-    parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
+    parser.add_argument('--skip_first_line', type=bool, default=True, help="skip first line")
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
     parser.add_argument('INPUT', type=str, nargs = "+",
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
-    parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
-    parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
-    parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -31,15 +26,18 @@ if __name__ == "__main__":
     
     # num_y = args.num_y
     num_y = 5
-    skiprows = args.skiprows
-    skip_y = args.skip
+    skip_first_line = args.skip_first_line
+    # skip_y = args.skip
     
     
     x = []
     y = []
     for f in inputfile:
         fin = open(f, "r")
-        x0, y0 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
+        context = fin.readlines()
+        if skip_first_line:
+            context.pop(0)
+        x0, y0 = readcontext(context, num_y = 5, skip_y = 0)
         x1 = []
         y1 = []
         for idata in range(len(x0)):
@@ -88,21 +86,8 @@ if __name__ == "__main__":
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, title = args.title)
     # add diagonal line
-    if args.diagonal_line:
-        plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
+    plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     
-    if args.logx:
-        plt.semilogx()
-    if args.logy:
-        plt.semilogy()
-    
-    plt.savefig("fig", bbox_inches = "tight")
+    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
     plt.show()
     
-    from sklearn.metrics import mean_squared_error, r2_score
-    for i_file in range(len(x)):
-        print(np.sqrt(mean_squared_error(x[i_file], y[i_file])), r2_score(x[i_file], y[i_file]))
-        plt = plot_error_distribution(x[i_file], y[i_file])
-        plt.xlim((-0.5,0.5))
-        plt.savefig("distrib")
-        plt.show()
