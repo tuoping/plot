@@ -2,8 +2,10 @@ from copy import deepcopy
 from matplotlib.pyplot import cm
 import numpy as np
 
-def generateformat(n):
+def generateformat(n, singlecolor=False):
     colorlist = cm.rainbow(np.linspace(0, 1, n))
+    if singlecolor:
+        colorlist = ["blue"]*n
 
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)

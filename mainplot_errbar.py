@@ -17,15 +17,8 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
     plt.ylabel(ylabel, fontsize = 16)
     plt.tick_params(direction="in")
 
-def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
-    if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], s=10, marker=form["marker"], label=label)
-    elif formatindicator == "line-dot":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], markersize=3, label=label)
-    elif formatindicator == "line":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
-    elif formatindicator == "hist":
-	    pyplot.hist(x, y, align='mid',range=(0,1))
+def addline(x, y, yerr, form:dict, label=None, formatindicator="line-dot"):
+    plt.errorbar(x,y,yerr=yerr, c=form["c"], label=label, ecolor="grey", capsize=3)
 
 def startfig(size = (5,5)):
     plt.rcParams["figure.figsize"] = size
@@ -33,22 +26,8 @@ def startfig(size = (5,5)):
     plt.rcParams['xtick.major.width'] =2.0
     plt.rcParams['ytick.major.width'] =2.0
 
-def setfigform_simple(xlabel, ylabel):
-    # plt.legend(fontsize = 16, frameon=False)
-    font={'family':'serif',
-          # 'style':'italic',  # 斜体
-          'weight':'normal',
-          # 'color':'red',
-          'size': 18
-    }
-    plt.xlabel(xlabel, fontdict = font)
-    plt.ylabel(ylabel, fontdict = font)
-    plt.xticks(fontsize = font['size'], fontname = "serif")
-    plt.yticks(fontsize = font['size'], fontname = "serif")
-    plt.tick_params(direction="in")
-
 def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None):
-    # plt.legend(fontsize = 16, frameon=False)
+    plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -88,7 +67,7 @@ if __name__ == "__main__":
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
     parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
-    parser.add_argument('--num_y', type=int, default=1, help="number of y")
+    parser.add_argument('--num_y', type=int, default=6, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
     parser.add_argument('INPUT', type=str,
@@ -121,29 +100,25 @@ if __name__ == "__main__":
     
     
     max_x, min_x = getmaxmin(x)
-    max_y, min_y = getmaxmin(y)
+    max_y, min_y = getmaxmin(y[0:3])
     min_x = min_x - 0.1 * (max_x-min_x)
     max_x = max_x + 0.1 * (max_x-min_x)
     min_y = min_y - 0.1 * (max_y-min_y)
     max_y = max_y + 0.1 * (max_y-min_y)
-    min_y=0.986
-    max_y=1.000
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = np.arange(50, 375, 50)
-    # xtickList = (max_x-min_x) * np.arange(-0.2, 1.2, 0.2) + min_x
-    # ytickList = (max_y-min_y) * np.arange(-0.2, 1.2, 0.2) + min_y
-    ytickList = np.arange(0.988, max_y+0.002, 0.002)
+    #xtickList = (max_x-min_x) * np.arange(-0.2, 1.2, 0.2) + min_x
+    xtickList = np.arange(50,370,50)
+    ytickList = (max_y-min_y) * np.arange(-0.1, 1.2, 0.1) + min_y
     startfig((5,5))
 
     labellist = [" " for i in range(len(y))]
     assignformat = generateformat(len(y), singlecolor=args.singlecolor)
-    for i in range(num_y):
+    for i in range(3):
         form = assignformat[formatindicator]
-        addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
+        addline(x,y[i],y[i+3], form[i],labellist[i],formatindicator=formatindicator)
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
-    # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

@@ -8,7 +8,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from formatlist import generateformat
-from plotfunctions import addline, setfigform, getmaxmin, readcontext
+from mainplot_cv import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
@@ -47,8 +47,8 @@ if __name__ == "__main__":
         y.append(y1)
 
     plt.figure(figsize=(6,4))
-    labellist = [" " for i in range(len(x)*len(y))]
-    assignformat = generateformat(len(x)*len(y))
+    labellist = [" " for i in range(len(x))]
+    assignformat = generateformat(len(x))
     ptr = 0
     for i_file in range(len(x)):
         print(x[i_file])
