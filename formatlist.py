@@ -3,22 +3,35 @@ from matplotlib.pyplot import cm
 import numpy as np
 
 def generateformat(n, singlecolor=False):
-    colorlist = cm.rainbow(np.linspace(0, 1, n))
+    # colorlist = cm.rainbow(np.linspace(0, 1, n))
+    if n <= 4:
+        edgecolorlist = ["k", "r", "b", "g"]
+    else:
+        edgecolorlist = cm.rainbow(np.linspace(0, 1, n))#["k", "r", "b", "g"]
+    #if n > 1:
+    # colorlist = edgecolorlist
+    #else:
+    colorlist = ["w"]*n
     if singlecolor:
-        colorlist = ["blue"]*n
+        colorlist = ["k"]*n
+        edgecolorlist = colorlist
 
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)
     dotformatlist = []
-    for c in colorlist:
+    for i in range(len(colorlist)):
+        c = colorlist[i]
         dotformatlist.append({"c": c})
+        ec = edgecolorlist[i]
+        dotformatlist[-1]["ec"] = ec
     for f in dotformatlist:
         f["marker"] = "o"
     
     #lineformatlist
     #lineformatlist = deepcopy(colorlist)
     lineformatlist = []
-    for c in colorlist:
+    for i in range(len(colorlist)):
+        c = edgecolorlist[i]
         lineformatlist.append({"c": c})
     for f in lineformatlist:
         f["linestyle"]="-"
@@ -29,7 +42,7 @@ def generateformat(n, singlecolor=False):
         f['linestyle']="-"
     
     
-    assignformat = {"dot": dotformatlist, "line-dot": linedotformatlist, "line": lineformatlist}
+    assignformat = {"dot": dotformatlist, "line-dot": linedotformatlist, "line": lineformatlist, "hist": colorlist, "bar": colorlist}
     return assignformat
 
 '''

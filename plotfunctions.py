@@ -19,13 +19,15 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=30, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], marker=form["marker"], markersize=3, label=label)
+        plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=8, label=label)
     elif formatindicator == "line":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
     elif formatindicator == "hist":
-	    pyplot.hist(x, y, align='mid',range=(0,1))
+	    plt.hist(x, y, align='mid',range=(0,1))
+    elif formatindicator == "bar":
+	    plt.bar(x, y)
 
 def startfig(size = (5,5)):
     plt.rcParams["figure.figsize"] = size
@@ -34,7 +36,7 @@ def startfig(size = (5,5)):
     plt.rcParams['ytick.major.width'] =2.0
 
 def setfigform_simple(xlabel, ylabel):
-    # plt.legend(fontsize = 16, frameon=False)
+    plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -53,13 +55,17 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
           # 'style':'italic',  # 斜体
           'weight':'normal',
           # 'color':'red',
-          'size': 18
+          'size': 16
     }
     plt.title(title)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 3)
-    ytickround = np.round(ytickList, 3)
+    xtickround = np.round(xtickList, 2)
+    ytickround = np.round(ytickList, 2)
+    #xtickround = xtickList
+    #ytickround = ytickList
+    print(xtickround)
+    print(ytickround)
     plt.xticks( xtickround, fontsize = font['size'], fontname = "serif")
     plt.yticks( ytickround, fontsize = font['size'], fontname = "serif")
     if xlimit is not None:
@@ -80,6 +86,7 @@ def readcontext(context, num_y=1, skip_y=0, skiprows=0):
     c = np.transpose(c_)
     x = c[0].astype(np.float)
     y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
+    # y = np.array([c[2],c[4]]).astype(np.float)
     return x,y
 
 if __name__ == "__main__":
@@ -97,7 +104,8 @@ if __name__ == "__main__":
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
-    parser.add_argument("--singlecolor", type=bool, default=False, help="log scale of y axis")
+    parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -110,30 +118,19 @@ if __name__ == "__main__":
     
     
     fin = open(inputfile, "r")
-    x, y = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
+    x, y= readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
 
-    
-    print(x)
+    # for i in range(len(y[0])):
+    #    x[i] /= args.natom
+    for i in range(len(y[0])):
+        for j in range(num_y):
+            y[j][i] /= args.natom
+        # y[0][i] /= 8
+        # y[1][i] /= 8
+        # y[2][i] /= 4
+
     print(y)
-    for yi in y:
-        print(yi)
-    print("\n")
-    
-    
-    max_x, min_x = getmaxmin(x)
-    max_y, min_y = getmaxmin(y)
-    min_x = min_x - 0.1 * (max_x-min_x)
-    max_x = max_x + 0.1 * (max_x-min_x)
-    min_y = min_y - 0.1 * (max_y-min_y)
-    max_y = max_y + 0.1 * (max_y-min_y)
-    min_y=0.986
-    max_y=1.000
-    print((min_x, min_y))
-    print((max_x, max_y))
-    xtickList = np.arange(50, 375, 50)
-    # xtickList = (max_x-min_x) * np.arange(-0.2, 1.2, 0.2) + min_x
-    # ytickList = (max_y-min_y) * np.arange(-0.2, 1.2, 0.2) + min_y
-    ytickList = np.arange(0.988, max_y+0.002, 0.002)
+
     startfig((5,5))
 
     labellist = [" " for i in range(len(y))]
@@ -142,17 +139,27 @@ if __name__ == "__main__":
         form = assignformat[formatindicator]
         addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
     
+    if args.logx:
+        plt.semilogx()
+    if args.logy:
+        plt.semilogy()
+    max_x, min_x = getmaxmin(x)
+    max_y, min_y = getmaxmin(y)
+    print((min_x, min_y))
+    print((max_x, max_y))
+    #max_y=1819
+    #max_y=1
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.2, 0.2) + min_x
+    # xtickList = np.arange(20,440,50)
+    ytickList = (max_y-min_y) * np.arange(-0.2, 1.2, 0.2) + min_y
+
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
+    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
-    if args.logx:
-        plt.semilogx()
-    if args.logy:
-        plt.semilogy()
-    
-    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
+    plt.savefig("fig", bbox_inches = "tight")
     plt.show()
     

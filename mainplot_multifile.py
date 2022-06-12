@@ -8,7 +8,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from formatlist import generateformat
-from mainplot_cv import addline, setfigform, getmaxmin, readcontext
+from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
@@ -27,6 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
+    parser.add_argument("--natom", type=float, default=1, help="natom")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -44,11 +45,15 @@ if __name__ == "__main__":
         fin = open(f, "r")
         x1, y1 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
         x.append(x1)
+        for i in range(len(y1[0])):
+            for j in range(num_y):
+                y1[j][i] = (y1[j][i])/args.natom
         y.append(y1)
 
-    plt.figure(figsize=(6,4))
-    labellist = [" " for i in range(len(x))]
-    assignformat = generateformat(len(x))
+
+    plt.figure(figsize=(5,5))
+    labellist = [" " for i in range(len(x)*num_y)]
+    assignformat = generateformat(len(x)*num_y)
     ptr = 0
     for i_file in range(len(x)):
         print(x[i_file])
@@ -75,13 +80,21 @@ if __name__ == "__main__":
     min_x = min(minxlist)
     max_y = max(maxylist)
     min_y = min(minylist)
-    #max_y=0.05
+    min_x = min_x # - 0.1 * (max_x-min_x)
+    max_x = max_x # + 0.1 * (max_x-min_x)
+    min_y = min_y - 0.1 * (max_y-min_y)
+    max_y = max_y + 0.1 * (max_y-min_y)
+    # min_y = 0
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
+    xtickList = (max_x-min_x) * np.arange(0, 1.1, 0.2) + min_x
+    # xtickList = np.arange(50,500,100)
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), title = args.title)
+    if args.logy:
+        setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), title = args.title)
+    else:
+        setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), ylimit=(min_y, max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

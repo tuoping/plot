@@ -8,11 +8,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from formatlist import generateformat
-from plotfunctions import addline, setfigform, getmaxmin, readcontext, drawHist, startfig
+from plotfunctions import addline, setfigform, getmaxmin, readcontext
 
 
 if __name__ == "__main__":
 
+    labellist = [" ", " ", " ", " ", " "]
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
@@ -37,38 +38,57 @@ if __name__ == "__main__":
     skip_y = args.skip
     
     
-    y = []
-    for inputf in inputfile:
-        fin = open(inputf, "r")
-        y1 = np.loadtxt(fin)
-        fin.close()
-        y.append(y1)
+    x = []
+    y_ = []
+    for f in inputfile:
+        fin = open(f, "r")
+        x1, y1 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
+        x.append(x1)
+        y_.append(y1)
+    y = [[y_[0][0]-y_[1][0]]]
+    print(y_)
+    print(y)
+    print("\n")
+
+    plt.figure(figsize=(6,4))
+    labellist = [" " for i in range(len(x))]
+    assignformat = generateformat(len(x))
+    ptr = 0
+    for i_file in range(1):
+        print(x[i_file])
+        #for yi in y[i_file]:
+        #    print(yi)
+        print("\n")
+        for i in range(num_y):
+            form = assignformat[formatindicator]
+            addline(x[i_file],y[i_file][i], form[ptr], labellist[ptr], formatindicator=formatindicator)
+            ptr += 1
     
-    for i in range(len(y[0])):
-        y[0][i] /= np.sqrt(2)
-        y[1][i] /= np.sqrt(2)
-    
-    
+    maxxlist = []
+    minxlist = []
     maxylist = []
     minylist = []
-    for i_file in range(len(inputfile)):
+    for i_file in range(1):
+        max_x, min_x = getmaxmin(x[i_file])
         max_y, min_y = getmaxmin(y[i_file])
+        maxxlist.append(max_x)
+        minxlist.append(min_x)
         maxylist.append(max_y)
         minylist.append(min_y)
+    max_x = max(maxxlist)
+    min_x = min(minxlist)
     max_y = max(maxylist)
     min_y = min(minylist)
-    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
-    startfig((5,5))
-
-    assignformat = generateformat(len(y1))
-    # for i in range(num_y):
-    #    form = assignformat[formatindicator]
-    #    addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
-    bounds = None
-    for i in range(len(inputfile)):
-        drawHist(y[i], bounds=(min_y,max_y), hnum=100, xlabel = args.xlabel, ylabel=args.ylabel, title = args.title)
+    min_x = min_x - 0.1 * (max_x-min_x)
+    max_x = max_x + 0.1 * (max_x-min_x)
+    min_y = min_y - 0.1 * (max_y-min_y)
+    max_y = max_y + 0.1 * (max_y-min_y)
+    print((min_x, min_y))
+    print((max_x, max_y))
+    xtickList = (max_x-min_x) * np.arange(0, 1.3, 0.3) + min_x
+    ytickList = (max_y-min_y) * np.arange(0.2, 1.2, 0.2) + min_y
     
-    #setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
@@ -78,6 +98,6 @@ if __name__ == "__main__":
     if args.logy:
         plt.semilogy()
     
-    plt.savefig("distrib.png", dpi=1100, bbox_inches = "tight")
+    plt.savefig("fig", bbox_inches = "tight")
     plt.show()
     
