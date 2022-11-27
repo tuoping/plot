@@ -19,7 +19,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=3, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=50, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=8, label=label)
     elif formatindicator == "line":
@@ -60,8 +60,8 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     plt.title(title)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 2)
+    xtickround = np.round(xtickList, 3)
+    ytickround = np.round(ytickList, 3)
     #xtickround = xtickList
     #ytickround = ytickList
     print(xtickround)
@@ -86,7 +86,7 @@ def readcontext(context, num_y=1, skip_y=0, skiprows=0):
     c = np.transpose(c_)
     x = c[0].astype(np.float)
     y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
-    # y = np.array([c[2],c[4]]).astype(np.float)
+    # y = np.array([c[1]]).astype(np.float) - np.array([c[3]]).astype(np.float)
     return x,y
 
 if __name__ == "__main__":
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
-    parser.add_argument('INPUT', type=str,
+    parser.add_argument('INPUT', type=str, nargs = "+",
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
@@ -108,40 +108,42 @@ if __name__ == "__main__":
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     args = parser.parse_args()
     
-    formatindicator = args.format
+    # formatindicator = args.format
+    formatindicator = "dot"
     
     inputfile = args.INPUT
     
     num_y = args.num_y
-    skiprows = args.skiprows
+    skiprows = 1
     skip_y = args.skip
+    natom=[args.natom]*len(inputfile)
     
     
-    fin = open(inputfile, "r")
-    _x, _y= readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
-
     x = []
-    for i in range(len(_y[0])):
-        _x[i] /= args.natom
-        if _x[i] > -7:
-            x.append(_x[i])
     y = []
-    for j in range(num_y):
-        y.append([])
-        for i in range(len(_y[0])):
-            _y[j][i] /= args.natom
-            if _y[j][i] > -7:
-                y[-1].append(_y[j][i])
+    idx_f = 0
+    for f in inputfile:
+        fin = open(f, "r")
+        x1, y1 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
+        x.append(x1/natom[idx_f])
+        for i in range(len(y1[0])):
+            for j in range(num_y):
+                y1[j][i] = (y1[j][i])/natom[idx_f]
+        y.append(y1)
+        idx_f += 1
+
 
     print(y)
 
-    startfig((5,5))
-
-    labellist = [" " for i in range(len(y))]
-    assignformat = generateformat(len(y), singlecolor=args.singlecolor)
-    for i in range(num_y):
-        form = assignformat[formatindicator]
-        addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
+    plt.figure(figsize=(5,5))
+    labellist = [" " for i in range(len(x)*num_y)]
+    assignformat = generateformat(len(x)*num_y)
+    ptr = 0
+    for i_file in range(len(x)):
+        for i in range(num_y):
+            form = assignformat[formatindicator]
+            addline(x[i_file],y[i_file][i], form[ptr], labellist[ptr], formatindicator=formatindicator)
+            ptr += 1
     
     if args.logx:
         plt.semilogx()
@@ -149,19 +151,22 @@ if __name__ == "__main__":
         plt.semilogy()
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
-    print((min_x, min_y))
-    print((max_x, max_y))
-    #max_y=1819
-    #max_y=1
-    xtickList = (max_x-min_x) * np.arange(-0.3, 1.3, 0.3) + min_x
-    # ytickList = (max_y-min_y) * np.arange(-0.2, 1.2, 0.2) + min_y
+    #min_x = min_x - 0.1 * (max_x - min_x)
+    #max_x = max_x + 0.1 * (max_x - min_x)
+    min_x = min(min_x, min_y)
+    max_x = max(max_x, max_y)
+    min_x = min_x - 0.1 * (max_x - min_x)
+    max_x = max_x + 0.1 * (max_x - min_x)
+    xtickList = (max_x-min_x) * np.arange(-0.3, 1.4, 0.3) + min_x
     ytickList = xtickList
+    min_y = min_x
+    max_y = max_x
 
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
-    if args.diagonal_line:
-        plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
+    # if args.diagonal_line:
+    plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
     plt.savefig("fig", bbox_inches = "tight")

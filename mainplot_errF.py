@@ -75,8 +75,8 @@ if __name__ == "__main__":
     print((max_x, max_y))
     min_ = min(min_x, min_y)
     max_ = max(max_x, max_y)
-    xtickList = (max_-min_) * np.arange(-0.2, 1.2, 0.2) + min_
-    ytickList = (max_-min_) * np.arange(-0.2, 1.2, 0.2) + min_
+    xtickList = (max_-min_) * np.arange(0.2, 1.2, 0.2) + min_
+    ytickList = (max_-min_) * np.arange(0.2, 1.2, 0.2) + min_
 
     plt.figure(figsize=(5,5))
     plt.rcParams['agg.path.chunksize'] = 10000

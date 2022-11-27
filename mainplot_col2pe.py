@@ -19,9 +19,9 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=5, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=50, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
-        plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
+        plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=8, label=label)
     elif formatindicator == "line":
         plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
     elif formatindicator == "hist":
@@ -50,7 +50,7 @@ def setfigform_simple(xlabel, ylabel):
     plt.tick_params(direction="in")
 
 def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None):
-    # plt.legend(fontsize = 16, frameon=False)
+    plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -61,9 +61,9 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
     xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 2)
-    # xtickround = xtickList
-    # ytickround = ytickList
+    ytickround = np.round(ytickList, 4)
+    #xtickround = xtickList
+    #ytickround = ytickList
     print(xtickround)
     print(ytickround)
     plt.xticks( xtickround, fontsize = font['size'], fontname = "serif")
@@ -85,8 +85,8 @@ def readcontext(context, num_y=1, skip_y=0, skiprows=0):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
     x = c[0].astype(np.float)
-    y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
-    y = np.reshape(y, [num_y, -1])
+    # y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
+    y = np.array([c[1]]).astype(np.float) - np.array([c[3]]).astype(np.float)
     return x,y
 
 if __name__ == "__main__":
@@ -105,10 +105,6 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=float, default=1, help="natom")
-    parser.add_argument("--xmax", type=float, default=None, help="")
-    parser.add_argument("--xmin", type=float, default=None, help="")
-    parser.add_argument("--ymax", type=float, default=None, help="")
-    parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     args = parser.parse_args()
     
@@ -119,17 +115,18 @@ if __name__ == "__main__":
     num_y = args.num_y
     skiprows = args.skiprows
     skip_y = args.skip
-    natom = [args.natom]*num_y
     
     
     fin = open(inputfile, "r")
-    x, _y= readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
+    x, y= readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
 
-    y = deepcopy(_y)
-    for j in range(num_y):
-        for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j]# -_y[j][0]
-           
+    # for i in range(len(y[0])):
+    #    x[i] /= args.natom
+    fpe = open("pe.dat", "w")
+    for i in range(len(y[0])):
+        for j in range(num_y):
+            y[j][i] /= args.natom
+        fpe.write("%f   %f\n"%(x[i]*2000, y[0][i]))
 
     print(y)
 
@@ -145,22 +142,18 @@ if __name__ == "__main__":
         plt.semilogx()
     if args.logy:
         plt.semilogy()
-    print(y)
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
-    if args.xmax is not None:
-        max_x = args.xmax
-    if args.xmin is not None:
-        min_x = args.xmin
-    if args.ymax is not None:
-        max_y = args.ymax
-    if args.ymin is not None:
-        min_y = args.ymin
+    #min_x = min_x - 0.1 * (max_x - min_x)
+    #max_x = max_x + 0.1 * (max_x - min_x)
+    min_y = min_y - 0.1 * (max_y - min_y)
+    max_y = max_y + 0.1 * (max_y - min_y)
     print((min_x, min_y))
     print((max_x, max_y))
+    # min_y=-4.8
+    # max_y=-4.65
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-    # ytickList = np.arange(0.6, 1.3, 0.1)
 
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)

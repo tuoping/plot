@@ -40,18 +40,19 @@ if __name__ == "__main__":
     y = []
     for inputf in inputfile:
         fin = open(inputf, "r")
-        y1 = np.loadtxt(fin)
-        fin.close()
+        fc = np.loadtxt(fin).T
+        y1 = fc[2]
         y.append(y1)
+        y1 = fc[4]
+        y.append(y1)
+        fin.close()
     
-    for i in range(len(y[0])):
-        y[0][i] /= np.sqrt(2)
-        y[1][i] /= np.sqrt(2)
     
     
     maxylist = []
     minylist = []
-    for i_file in range(len(inputfile)):
+    # for i_file in range(len(inputfile)):
+    for i_file in range(2):
         max_y, min_y = getmaxmin(y[i_file])
         maxylist.append(max_y)
         minylist.append(min_y)
@@ -65,8 +66,9 @@ if __name__ == "__main__":
     #    form = assignformat[formatindicator]
     #    addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     bounds = None
-    for i in range(len(inputfile)):
-        drawHist(y[i], bounds=(min_y,max_y), hnum=100, xlabel = args.xlabel, ylabel=args.ylabel, title = args.title)
+    # for i in range(len(inputfile)):
+    for i in range(2):
+        drawHist(y[i], bounds=(min_y,max_y), hnum=50, xlabel = args.xlabel, ylabel=args.ylabel, title = args.title)
     
     #setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, ylimit=(min_y,max_y), title = args.title)
     # add diagonal line

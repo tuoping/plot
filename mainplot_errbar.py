@@ -98,9 +98,10 @@ if __name__ == "__main__":
         fin = open(f, "r")
         x1, y1 = readcontext(fin, num_y=num_y*2, skip_y=skip_y, skiprows = skiprows)
         x.append(x1)
-        for i in range(len(y1[0])):
-            for j in range(num_y):
+        for j in range(num_y):
+            for i in range(len(y1[j])):
                 y1[j][i] /= args.natom
+                y1[j][i] = np.abs(y1[j][i])
         y.append(y1)
     #fin = open(inputfile, "r")
     #x, y = readcontext(fin, num_y=num_y*2, skip_y=skip_y, skiprows=skiprows)
@@ -113,12 +114,26 @@ if __name__ == "__main__":
     print("\n")
     
     
-    max_x, min_x = getmaxmin(x)
-    max_y, min_y = getmaxmin(y[:num_y])
-    min_x = min_x
-    max_x = max_x
-    min_y = min_y
-    max_y = max_y
+    maxxlist = []
+    minxlist = []
+    maxylist = []
+    minylist = []
+    for i_file in range(len(x)):
+        max_x, min_x = getmaxmin(x[i_file])
+        max_y, min_y = getmaxmin(y[i_file])
+        maxxlist.append(max_x)
+        minxlist.append(min_x)
+        maxylist.append(max_y)
+        minylist.append(min_y)
+    max_x = max(maxxlist)
+    min_x = min(minxlist)
+    max_y = max(maxylist)
+    min_y = min(minylist)
+    min_x = min_x # - 0.1 * (max_x-min_x)
+    max_x = max_x # + 0.1 * (max_x-min_x)
+    min_y = min_y - 0.1 * (max_y-min_y)
+    max_y = max_y + 0.1 * (max_y-min_y)
+    min_y=0
     print((min_x, min_y))
     print((max_x, max_y))
     xtickList = np.arange(20,500,100)
@@ -135,13 +150,8 @@ if __name__ == "__main__":
     ptr = 0
     ecolor = ["grey", "pink","lightblue"]
     for i_file in range(len(inputfile)):
-        print(x[i_file])
-        for yi in y[i_file]:
-            print(yi)
-        print("\n")
         for i in range(num_y):
             form = assignformat[formatindicator]
-            print(form[ptr])
             addline(x[i_file],y[i_file][i],y[i_file][i+num_y], form[ptr], labellist[ptr], formatindicator=formatindicator, ecolor = ecolor[i])
             ptr += 1
     

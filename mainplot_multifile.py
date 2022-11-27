@@ -28,6 +28,10 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--xmax", type=float, default=None, help="")
+    parser.add_argument("--xmin", type=float, default=None, help="")
+    parser.add_argument("--ymax", type=float, default=None, help="")
+    parser.add_argument("--ymin", type=float, default=None, help="")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -38,17 +42,20 @@ if __name__ == "__main__":
     skiprows = args.skiprows
     skip_y = args.skip
     
+    natom = [args.natom]*len(inputfile)
     
     x = []
     y = []
+    idx_f = 0
     for f in inputfile:
         fin = open(f, "r")
         x1, y1 = readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows = skiprows)
         x.append(x1)
         for i in range(len(y1[0])):
             for j in range(num_y):
-                y1[j][i] = (y1[j][i])/args.natom
+                y1[j][i] = (y1[j][i])/natom[idx_f]
         y.append(y1)
+        idx_f += 1
 
 
     plt.figure(figsize=(5,5))
@@ -80,16 +87,21 @@ if __name__ == "__main__":
     min_x = min(minxlist)
     max_y = max(maxylist)
     min_y = min(minylist)
-    min_x = min_x # - 0.1 * (max_x-min_x)
-    max_x = max_x # + 0.1 * (max_x-min_x)
-    min_y = min_y - 0.1 * (max_y-min_y)
-    max_y = max_y + 0.1 * (max_y-min_y)
-    # min_y = 0
+    if args.xmax is not None:
+        max_x = args.xmax
+    if args.xmin is not None:
+        min_x = args.xmin
+    if args.ymax is not None:
+        max_y = args.ymax
+    if args.ymin is not None:
+        min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(0, 1.1, 0.2) + min_x
     # xtickList = np.arange(50,500,100)
-    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
+    ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.1) + min_y
+    # ytickList = np.arange(0.0, 1.23, 0.04)
+    print(ytickList)
     
     if args.logy:
         setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), title = args.title)

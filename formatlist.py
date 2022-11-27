@@ -9,9 +9,9 @@ def generateformat(n, singlecolor=False):
     else:
         edgecolorlist = cm.rainbow(np.linspace(0, 1, n))#["k", "r", "b", "g"]
     #if n > 1:
-    # colorlist = edgecolorlist
+    colorlist = edgecolorlist
     #else:
-    colorlist = ["w"]*n
+    # colorlist = ["w"]*n
     if singlecolor:
         colorlist = ["k"]*n
         edgecolorlist = colorlist
@@ -25,7 +25,7 @@ def generateformat(n, singlecolor=False):
         ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
     for f in dotformatlist:
-        f["marker"] = "o"
+        f["marker"] = "s"
     
     #lineformatlist
     #lineformatlist = deepcopy(colorlist)

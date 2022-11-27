@@ -13,24 +13,30 @@ from plotfunctions import addline, setfigform, getmaxmin, readcontext, startfig
 
 def readcontextrows(context, skip_y=0, skiprows=0):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
-    y = c_[np.arange(0,len(c_), skip_y)].astype(np.float)
+    if len(c_.shape) == 1:
+        c_ = c_[np.newaxis, :]
+    y = c_[np.arange(0, len(c_), skip_y)].astype(np.float)
     return y
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
-    parser.add_argument('--skip', type=int, default=0, help='skip columes')
-    parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
+    parser.add_argument('--skip', type=int, default=1, help='skip columes')
+    parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
-    parser.add_argument('INPUT', type=str,
+    parser.add_argument('INPUT', type=str, nargs = "+",
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
+    parser.add_argument("--xmax", type=float, default=None, help="")
+    parser.add_argument("--xmin", type=float, default=None, help="")
+    parser.add_argument("--ymax", type=float, default=None, help="")
+    parser.add_argument("--ymin", type=float, default=None, help="")
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -42,28 +48,36 @@ if __name__ == "__main__":
     skip_y = args.skip
     
     
-    fin = open(inputfile, "r")
+    fin = open(inputfile[0], "r")
     y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
+    print(y_)
     y = []
     for i in range(len(y_)):
         y.append(y_[i][1:])
-    x = np.arange(len(y[0]))+5.0
+    print("len(y[0]) = ",len(y[0]))
+    x = 0.5*np.arange(len(y[0]))+4.0
     
-    print(x)
-    print(y)
-    for yi in y:
-        print(yi)
-    print("\n")
+    print("x=", x)
+    #print(y)
+    #print("\n")
     
     
     max_x, min_x = getmaxmin(np.array(x))
     max_y, min_y = getmaxmin(np.array(y))
-    min_y=0.75
-    max_y=1.2
+    min_y=0
+    max_y=2.0
+    if args.xmax is not None:
+        max_x = args.xmax
+    if args.xmin is not None:
+        min_x = args.xmin
+    if args.ymax is not None:
+        max_y = args.ymax
+    if args.ymin is not None:
+        min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
-    #xtickList = np.arange(50, 550, 50)
+    # xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
+    xtickList = np.arange(4, max_x+0.1, 4)
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     startfig((5,5))
 
@@ -73,7 +87,7 @@ if __name__ == "__main__":
         form = assignformat[formatindicator]
         addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
