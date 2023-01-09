@@ -19,7 +19,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=5, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=50, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
@@ -61,7 +61,7 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
     xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 2)
+    # ytickround = np.round(ytickList, 2)
     # xtickround = xtickList
     ytickround = ytickList
     print(xtickround)
@@ -81,25 +81,22 @@ def getmaxmin(data, dtype = float):
     min_data = np.reshape(tmpdata, [-1]).min()
     return max_data, min_data
 
-def readcontext(context, num_y=1, skip_y=0, skiprows=0):
+def readcontext(context, item_col, skiprows=1):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
-    if len(c.shape) == 1:
-        y = c.astype(np.float)
-        y = np.reshape(y, [num_y, -1])
-        x = np.arange(len(c))
-    else:
-        x = c[0].astype(np.float)
-        y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
-        y = np.reshape(y, [num_y, -1])
-    return x,y
+    x = c[item_col[0]].astype(np.float)
+    y = []
+    for i in item_col[1:]:
+        _y = c[i].astype(np.float)
+        y.append(_y)
+    return x,np.array(y)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
-    parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
+    parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
@@ -116,11 +113,19 @@ if __name__ == "__main__":
     parser.add_argument("--ymax", type=float, default=None, help="")
     parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
+    parser.add_argument("--item", type=str)
     args = parser.parse_args()
     
     formatindicator = args.format
     
     inputfile = args.INPUT
+    with open(inputfile) as f:
+        header = f.readline().split()
+    items = args.item.split(",")
+    item_col = []
+    for i in items:
+        item_col.append( header.index(i))
+    print(item_col)
     
     num_y = args.num_y
     skiprows = args.skiprows
@@ -129,23 +134,21 @@ if __name__ == "__main__":
     
     
     fin = open(inputfile, "r")
-    x, _y= readcontext(fin, num_y=num_y, skip_y=skip_y, skiprows=skiprows)
+    x, _y= readcontext(fin, item_col, skiprows=skiprows)
 
     y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j]# -_y[j][0]
-    #for i in range(y.shape[-1]):
-    #    x[i] = x[i]/natom[j]
+            y[j][i] = (_y[j][i] )/natom[j]
            
 
-    print(x)
     print(y)
 
     startfig((5,5))
 
     labellist = [" " for i in range(len(y))]
     assignformat = generateformat(len(y), singlecolor=args.singlecolor)
+    num_y = len(items)-1
     for i in range(num_y):
         form = assignformat[formatindicator]
         addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
@@ -179,11 +182,8 @@ if __name__ == "__main__":
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-    # min_y = min_x
-    # max_y = max_x
-    # ytickList = xtickList
 
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
@@ -192,6 +192,6 @@ if __name__ == "__main__":
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="r")
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
-    plt.savefig("fig", bbox_inches = "tight")
+    plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
     plt.show()
     
