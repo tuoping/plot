@@ -64,8 +64,6 @@ if __name__ == "__main__":
     
     max_x, min_x = getmaxmin(np.array(x))
     max_y, min_y = getmaxmin(np.array(y))
-    min_y=0
-    max_y=2.0
     if args.xmax is not None:
         max_x = args.xmax
     if args.xmin is not None:
