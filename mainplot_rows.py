@@ -48,14 +48,14 @@ if __name__ == "__main__":
     skip_y = args.skip
     
     
-    fin = open(inputfile[0], "r")
-    y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
-    print(y_)
     y = []
-    for i in range(len(y_)):
-        y.append(y_[i][1:])
-    print("len(y[0]) = ",len(y[0]))
-    x = 0.5*np.arange(len(y[0]))+4.0
+    for i in range(len(inputfile)):
+       fin = open(inputfile[i], "r")
+       y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
+       print(y_)
+       for i in range(len(y_)):
+           y.append(y_[i][1:])
+    x = 0.01*np.arange(len(y[0]))+3.0
     
     print("x=", x)
     #print(y)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print((min_x, min_y))
     print((max_x, max_y))
     # xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
-    xtickList = np.arange(4, max_x+0.1, 4)
+    xtickList = np.arange(3, max_x+0.1, (max_x-3)/10)
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     startfig((5,5))
 
