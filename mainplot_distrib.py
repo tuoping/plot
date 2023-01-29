@@ -16,7 +16,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
-    parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
+    parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
@@ -35,6 +35,7 @@ if __name__ == "__main__":
     num_y = args.num_y
     skiprows = args.skiprows
     skip_y = args.skip
+    # cols = [i for i in range(skip_y+1, skip_y+num_y+1)]
     
     
     y = []
@@ -68,8 +69,10 @@ if __name__ == "__main__":
     #    addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     bounds = None
     # for i in range(len(inputfile)):
+    print("Averages and standard_err:: ")
     for i in range(args.num_y):
         drawHist(y[i], bounds=(min_y,max_y), hnum=50, xlabel = args.xlabel, ylabel=args.ylabel, title = args.title)
+        print(np.average(y[i]), np.std(y[i]))
     
     #setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, ylimit=(min_y,max_y), title = args.title)
     # add diagonal line

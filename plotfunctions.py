@@ -121,6 +121,7 @@ if __name__ == "__main__":
     inputfile = args.INPUT
     with open(inputfile) as f:
         header = f.readline().split()
+    print("header:: ", header)
     items = args.item.split(",")
     item_col = []
     for i in items:
