@@ -75,7 +75,7 @@ if __name__ == "__main__":
     print((min_x, min_y))
     print((max_x, max_y))
     # xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
-    xtickList = np.arange(3, max_x+0.1, (max_x-3)/10)
+    xtickList = np.arange(3, max_x+0.1, (max_x-3)/5)
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     startfig((5,5))
 

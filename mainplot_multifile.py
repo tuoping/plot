@@ -41,16 +41,16 @@ if __name__ == "__main__":
     formatindicator = args.format
     
     inputfile = args.INPUT
-    with open(inputfile[0]) as f:
-        header = f.readline().split()
     if args.item is not None:
         items = args.item.split(",")
     else:
         items = []
-    item_col = []
-    for i in items:
-        item_col.append( header.index(i)-args.headerskip)
-    print(item_col)
+    # with open(inputfile[0]) as f:
+    #     header = f.readline().split()
+    # item_col = []
+    # for i in items:
+    #     item_col.append( header.index(i)-args.headerskip)
+    # print(item_col)
     
     num_y = args.num_y
     skiprows = args.skiprows
@@ -63,6 +63,11 @@ if __name__ == "__main__":
     idx_f = 0
     for f in inputfile:
         fin = open(f, "r")
+        header = fin.readline().split()
+        item_col = []
+        for i in items:
+            item_col.append( header.index(i)-args.headerskip)
+        print(item_col)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
         x.append(x1)
         for i in range(len(y1[0])):
@@ -127,14 +132,12 @@ if __name__ == "__main__":
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
-    if args.item is not None:
-        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
-    # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
-    
     if args.logy:
-        setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), title = args.title)
+        if args.item is not None:
+            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), title = args.title)
     else:
-        setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x, max_x), ylimit=(min_y, max_y), title = args.title)
+        if args.item is not None:
+            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

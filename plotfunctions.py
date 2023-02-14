@@ -49,8 +49,9 @@ def setfigform_simple(xlabel, ylabel):
     plt.yticks(fontsize = font['size'], fontname = "serif")
     plt.tick_params(direction="in")
 
-def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None):
-    plt.legend(fontsize = 16, frameon=False)
+def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None, legend = False):
+    if legend:
+        plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -58,9 +59,10 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
           'size': 16
     }
     plt.title(title)
+    print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
+    xtickround = np.round(xtickList, 3)
     # ytickround = np.round(ytickList, 2)
     # xtickround = xtickList
     ytickround = ytickList
@@ -96,7 +98,10 @@ def readcontext(context, item_col, skiprows=1):
     y = [c[x].astype(np.float)]
     print("y = ",y)
     '''
-    return x,np.array(y)
+    y = np.array(y)
+    y[np.isnan(y)] = 0
+    y[np.isinf(y)] = 0
+    return x,y
 
 if __name__ == "__main__":
 
@@ -122,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
+    parser.add_argument("--legend", type=bool, default=False)
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -175,17 +181,13 @@ if __name__ == "__main__":
         plt.semilogy()
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
+    max_x = max_x + (max_x - min_x)*0.5
+    min_x = min_x - (max_x - min_x)*0.5
+    print((min_x, min_y))
+    print((max_x, max_y))
     if args.horizontal_line is not None:
         min_y = min(min_y, args.horizontal_line)
         max_y = max(max_y, args.horizontal_line)
-    if min_y > 0:
-        min_y = min_y*(0.95)
-    else:
-        min_y = min_y*(1.05)
-    if max_y > 0:
-        max_y = max_y*(1.05)
-    else:
-        max_y = max_y*(0.95)
     if args.xmax is not None:
         max_x = args.xmax
     if args.xmin is not None:
@@ -200,7 +202,7 @@ if __name__ == "__main__":
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
     if args.item is not None:
-        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
