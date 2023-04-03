@@ -56,16 +56,16 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
           # 'style':'italic',  # 斜体
           'weight':'normal',
           # 'color':'red',
-          'size': 16
+          'size': 20
     }
     plt.title(title)
     print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 3)
-    # ytickround = np.round(ytickList, 2)
+    xtickround = np.round(xtickList, 4)
+    ytickround = np.round(ytickList, 4)
     # xtickround = xtickList
-    ytickround = ytickList
+    # ytickround = ytickList
     print("ticks")
     print(xtickround)
     print(ytickround)
@@ -144,7 +144,8 @@ if __name__ == "__main__":
         item_col.append( header.index(i)-args.headerskip)
     print(item_col)
     
-    num_y = args.num_y
+    # num_y = args.num_y
+    num_y = len(items)-1
     skiprows = args.skiprows
     skip_y = args.skip
     natom = [args.natom]*num_y
@@ -153,6 +154,7 @@ if __name__ == "__main__":
     fin = open(inputfile, "r")
     x, _y= readcontext(fin, item_col, skiprows=skiprows)
 
+    # x = x/1000000
     y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
@@ -181,8 +183,8 @@ if __name__ == "__main__":
         plt.semilogy()
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
-    max_x = max_x + (max_x - min_x)*0.5
-    min_x = min_x - (max_x - min_x)*0.5
+    #max_x = max_x + (max_x - min_x)*0.5
+    #min_x = min_x - (max_x - min_x)*0.5
     print((min_x, min_y))
     print((max_x, max_y))
     if args.horizontal_line is not None:
@@ -198,8 +200,8 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
+    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
 
     if args.item is not None:
         setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)

@@ -55,7 +55,11 @@ if __name__ == "__main__":
        print(y_)
        for i in range(len(y_)):
            y.append(y_[i][1:])
+<<<<<<< HEAD
     x = 0.01*np.arange(len(y[0]))+3.0
+=======
+    x = 0.1*np.arange(len(y[0]))+0.5
+>>>>>>> 435e845659d287fd31a1f0e95ffcb326a496b9ad
     
     print("x=", x)
     #print(y)
@@ -75,7 +79,11 @@ if __name__ == "__main__":
     print((min_x, min_y))
     print((max_x, max_y))
     # xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
+<<<<<<< HEAD
     xtickList = np.arange(3, max_x+0.1, (max_x-3)/5)
+=======
+    xtickList = np.arange(0.5, max_x+0.1, (max_x-0.5)/5)
+>>>>>>> 435e845659d287fd31a1f0e95ffcb326a496b9ad
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     startfig((5,5))
 
@@ -85,7 +93,7 @@ if __name__ == "__main__":
         form = assignformat[formatindicator]
         addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = "Q (A^-1)", ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
