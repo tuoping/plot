@@ -8,12 +8,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from formatlist import generateformat
-from plotfunctions import addline, setfigform, getmaxmin, readcontext, startfig
+from plotfunctions import addline, setfigform, getmaxmin, readcontext, startfig, setfigform_simple
 
 
 if __name__ == "__main__":
 
-    labellist = [" ", " ", " ", " ", " "]
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
@@ -36,6 +35,7 @@ if __name__ == "__main__":
     parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
+    parser.add_argument("--legend", type=bool, default=False)
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -52,7 +52,8 @@ if __name__ == "__main__":
     #     item_col.append( header.index(i)-args.headerskip)
     # print(item_col)
     
-    num_y = args.num_y
+    # num_y = args.num_y
+    num_y = len(items)-1
     skiprows = args.skiprows
     skip_y = args.skip
     
@@ -73,6 +74,8 @@ if __name__ == "__main__":
         for i in range(len(y1[0])):
             for j in range(num_y):
                 y1[j][i] = (y1[j][i])/natom[idx_f]
+        print(f)
+        print(y1)
         y.append(y1)
         idx_f += 1
 
@@ -81,26 +84,24 @@ if __name__ == "__main__":
     assignformat = generateformat(len(x)*num_y)
     if args.item is not None:
         num_y = len(item_col)-1
-        labellist = items[1:]
     else:
         num_y = len(header)
-        labellist = [" " for i in range(len(y))]
+    labellist = args.INPUT
     ptr = 0
     for i_file in range(len(x)):
-        print(x[i_file])
-        for yi in y[i_file]:
-            print(yi)
-        print("\n")
         for i in range(num_y):
             form = assignformat[formatindicator]
-            addline(x[i_file],y[i_file][i], form[ptr], None, formatindicator=formatindicator)
+            addline(x[i_file],y[i_file][i], form[ptr], label=labellist[i_file], formatindicator=formatindicator)
             ptr += 1
     
     maxxlist = []
     minxlist = []
     maxylist = []
     minylist = []
+    print("Number of files = ",len(x),len(args.INPUT))
     for i_file in range(len(x)):
+        print("file:: ",i_file,args.INPUT[i_file])
+        print(x[i_file].shape)
         max_x, min_x = getmaxmin(x[i_file])
         max_y, min_y = getmaxmin(y[i_file])
         maxxlist.append(max_x)
@@ -129,15 +130,17 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-
+    if args.logx:
+        plt.semilogx()
     if args.logy:
-        if args.item is not None:
-            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), title = args.title)
+        plt.semilogy()
+    if args.logy or args.logx:
+        setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]))
     else:
-        if args.item is not None:
-            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
+
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

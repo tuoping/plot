@@ -4,10 +4,11 @@ import numpy as np
 
 def generateformat(n, singlecolor=False):
     # colorlist = cm.rainbow(np.linspace(0, 1, n))
-    if n <= 4:
-        edgecolorlist = ["k", "r", "b", "g"]
+    if n <= 7:
+        edgecolorlist = ["k", "r", "b", "g", "m", "lime","cyan"]
     else:
-        edgecolorlist = cm.rainbow(np.linspace(0, 1, n))#["k", "r", "b", "g"]
+        # edgecolorlist = cm.rainbow(np.linspace(0, 1, n))#["k", "r", "b", "g"]
+        edgecolorlist = cm.get_cmap("rainbow")#["k", "r", "b", "g"]
     #if n > 1:
     colorlist = edgecolorlist
     #else:
@@ -19,10 +20,16 @@ def generateformat(n, singlecolor=False):
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)
     dotformatlist = []
-    for i in range(len(colorlist)):
-        c = colorlist[i]
+    for i in range(n):
+        if n > 7:
+            c = colorlist(float(i)/float(n))
+        else:
+            c = colorlist[i]
         dotformatlist.append({"c": c})
-        ec = edgecolorlist[i]
+        if n > 7:
+            ec = edgecolorlist(float(i)/float(n))
+        else:
+            ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
     for f in dotformatlist:
         f["marker"] = "o"
@@ -30,8 +37,11 @@ def generateformat(n, singlecolor=False):
     #lineformatlist
     #lineformatlist = deepcopy(colorlist)
     lineformatlist = []
-    for i in range(len(colorlist)):
-        c = edgecolorlist[i]
+    for i in range(n):
+        if n > 7:
+            c = edgecolorlist(float(i)/float(n))
+        else:
+            c = edgecolorlist[i]
         lineformatlist.append({"c": c})
     for f in lineformatlist:
         f["linestyle"]="-"
