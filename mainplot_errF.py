@@ -30,13 +30,14 @@ if __name__ == "__main__":
     skiprows = args.skiprows
     # skip_y = args.skip
     
+    item_col = [0,1,2,3,4,5]
     
     x = []
     y = []
     for f in inputfile:
         fin = open(f, "r")
         context = fin.readlines()
-        x0, y0 = readcontext(context, num_y = 5, skip_y = 0, skiprows = skiprows)
+        x0, y0 = readcontext(context, item_col, skiprows = skiprows)
         x1 = []
         y1 = []
         for idata in range(len(x0)):

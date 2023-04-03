@@ -19,7 +19,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=50, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
@@ -49,8 +49,9 @@ def setfigform_simple(xlabel, ylabel):
     plt.yticks(fontsize = font['size'], fontname = "serif")
     plt.tick_params(direction="in")
 
-def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None):
-    # plt.legend(fontsize = 16, frameon=False)
+def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None, legend = False):
+    if legend:
+        plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -58,12 +59,14 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
           'size': 16
     }
     plt.title(title)
+    print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
+    xtickround = np.round(xtickList, 3)
     # ytickround = np.round(ytickList, 2)
     # xtickround = xtickList
     ytickround = ytickList
+    print("ticks")
     print(xtickround)
     print(ytickround)
     plt.xticks( xtickround, fontsize = font['size'], fontname = "serif")
@@ -89,13 +92,23 @@ def readcontext(context, item_col, skiprows=1):
     for i in item_col[1:]:
         _y = c[i].astype(np.float)
         y.append(_y)
-    return x,np.array(y)
+    '''
+    x = np.arange(0, len(c), 1)
+    print("x = ",x)
+    y = [c[x].astype(np.float)]
+    print("y = ",y)
+    '''
+    y = np.array(y)
+    y[np.isnan(y)] = 0
+    y[np.isinf(y)] = 0
+    return x,y
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
+    parser.add_argument('--headerskip', type=int, default=0, help='skip columes')
     parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
     parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
@@ -113,7 +126,8 @@ if __name__ == "__main__":
     parser.add_argument("--ymax", type=float, default=None, help="")
     parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
-    parser.add_argument("--item", type=str)
+    parser.add_argument("--item", type=str, default=None)
+    parser.add_argument("--legend", type=bool, default=False)
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -121,11 +135,13 @@ if __name__ == "__main__":
     inputfile = args.INPUT
     with open(inputfile) as f:
         header = f.readline().split()
-    print("header:: ", header)
-    items = args.item.split(",")
+    if args.item is not None:
+        items = args.item.split(",")
+    else:
+        items = []
     item_col = []
     for i in items:
-        item_col.append( header.index(i))
+        item_col.append( header.index(i)-args.headerskip)
     print(item_col)
     
     num_y = args.num_y
@@ -143,13 +159,18 @@ if __name__ == "__main__":
             y[j][i] = (_y[j][i] )/natom[j]
            
 
+    print(x)
     print(y)
 
     startfig((5,5))
 
-    labellist = [" " for i in range(len(y))]
     assignformat = generateformat(len(y), singlecolor=args.singlecolor)
-    num_y = len(items)-1
+    if args.item is not None:
+        num_y = len(item_col)-1
+        labellist = items[1:]
+    else:
+        num_y = len(header)
+        labellist = [" " for i in range(len(y))]
     for i in range(num_y):
         form = assignformat[formatindicator]
         addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
@@ -160,17 +181,13 @@ if __name__ == "__main__":
         plt.semilogy()
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
+    max_x = max_x + (max_x - min_x)*0.5
+    min_x = min_x - (max_x - min_x)*0.5
+    print((min_x, min_y))
+    print((max_x, max_y))
     if args.horizontal_line is not None:
         min_y = min(min_y, args.horizontal_line)
         max_y = max(max_y, args.horizontal_line)
-    if min_y > 0:
-        min_y = min_y*(0.95)
-    else:
-        min_y = min_y*(1.05)
-    if max_y > 0:
-        max_y = max_y*(1.05)
-    else:
-        max_y = max_y*(0.95)
     if args.xmax is not None:
         max_x = args.xmax
     if args.xmin is not None:
@@ -184,7 +201,8 @@ if __name__ == "__main__":
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
-    setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+    if args.item is not None:
+        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
     # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
@@ -193,6 +211,9 @@ if __name__ == "__main__":
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="r")
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
-    plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
+    if args.item is not None:
+        plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
+    else:
+        plt.savefig("fig")
     plt.show()
     

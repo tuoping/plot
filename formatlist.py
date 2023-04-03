@@ -25,7 +25,7 @@ def generateformat(n, singlecolor=False):
         ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
     for f in dotformatlist:
-        f["marker"] = "s"
+        f["marker"] = "o"
     
     #lineformatlist
     #lineformatlist = deepcopy(colorlist)
