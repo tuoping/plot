@@ -17,9 +17,11 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
     plt.ylabel(ylabel, fontsize = 16)
     plt.tick_params(direction="in")
 
-def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
+def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
+        # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=y,cmap="jet",vmin=3.5,vmax=5.0,s=10, marker=form["marker"], label=label)
+        # plt.scatter(x,y,c=y,cmap="bwr",vmin=2.5,vmax=3.5 ,s=2.5, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
@@ -36,7 +38,7 @@ def startfig(size = (5,5)):
     plt.rcParams['ytick.major.width'] =2.0
 
 def setfigform_simple(xlabel, ylabel):
-    # plt.legend(fontsize = 16, frameon=False)
+    plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -88,11 +90,16 @@ def readcontext(context, item_col, skiprows=1):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
     x = c[item_col[0]].astype(np.float)
-    # x = np.arange(c.shape[1])
     y = []
     for i in item_col[1:]:
         _y = c[i].astype(np.float)
         y.append(_y)
+    '''
+    x = np.arange(0, len(c), 1)
+    print("x = ",x)
+    y = [c[x].astype(np.float)]
+    print("y = ",y)
+    '''
     y = np.array(y)
     y[np.isnan(y)] = 0
     y[np.isinf(y)] = 0
@@ -125,6 +132,10 @@ if __name__ == "__main__":
     parser.add_argument("--legend", type=bool, default=False)
     args = parser.parse_args()
     
+    args.format="dot"
+    args.headerskip=2
+    args.item="time,sfc3"
+
     formatindicator = args.format
     
     inputfile = args.INPUT
@@ -136,7 +147,6 @@ if __name__ == "__main__":
         items = []
     item_col = []
     for i in items:
-        print(i, header.index(i))
         item_col.append( header.index(i)-args.headerskip)
     print(item_col)
     
@@ -169,7 +179,7 @@ if __name__ == "__main__":
     else:
         num_y = len(header)
         labellist = [" " for i in range(len(y))]
-    for i in range(num_y):
+    for i in range(1):
         form = assignformat[formatindicator]
         addline(x,y[i], form[i],labellist[i],formatindicator=formatindicator)
     
@@ -181,6 +191,8 @@ if __name__ == "__main__":
     max_y, min_y = getmaxmin(y)
     #max_x = max_x + (max_x - min_x)*0.5
     #min_x = min_x - (max_x - min_x)*0.5
+    max_y=5
+    min_y=1.5
     print((min_x, min_y))
     print((max_x, max_y))
     if args.horizontal_line is not None:
@@ -200,8 +212,8 @@ if __name__ == "__main__":
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
 
     if args.item is not None:
-        if not args.logy and not args.logx:
-            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
+        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
+    # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

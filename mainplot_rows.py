@@ -54,12 +54,14 @@ if __name__ == "__main__":
        y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
        print(y_)
        for i in range(len(y_)):
-           y.append(y_[i][1:])
-    x = 0.1*np.arange(len(y[0]))+0.5
+           y.append(y_[i][2:])
+    x=[273.598,274.977,276.37,277.778,279.2,280.636,282.087,283.554,285.036,286.533,288.046,289.575,291.121,292.683,294.262,295.858,297.471,299.103,300.752,302.419,304.105,305.81,307.535,309.278,311.042,312.826,314.63,316.456,318.302,320.171,322.061,323.974,325.91,327.869,329.852,331.858,333.89,335.946,338.028,340.136,342.27,344.432,346.62,348.837,351.083,353.357,355.661,357.995,360.36,362.757,365.186,367.647,370.142,372.671,375.235,377.834,380.469,383.142,385.852,388.601,391.389,394.218,397.088,400]
     
     print("x=", x)
-    #print(y)
-    #print("\n")
+    # print("y=", y)
+    # print("\n")
+    y = np.array(y)
+    print("DIM of y =", y.shape)
     
     
     max_x, min_x = getmaxmin(np.array(x))
@@ -74,18 +76,18 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    # xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.2) + min_x
-    xtickList = np.arange(0.5, max_x+0.1, (max_x-0.5)/5)
+    xtickList = (max_x-min_x) * np.arange(0, 1.2, 0.4) + min_x
     ytickList = (max_y-min_y) * np.arange(0, 1.2, 0.2) + min_y
     startfig((5,5))
 
     labellist = [" " for i in range(len(y))]
     assignformat = generateformat(len(y))
     for i in range(len(y)):
+        print(i)
         form = assignformat[formatindicator]
         addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
     
-    setfigform(xtickList, ytickList, xlabel = "Q (A^-1)", ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = "kBT", ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

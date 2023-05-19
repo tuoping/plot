@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
-    parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--natom", type=str, default=None, help="natom")
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
@@ -57,7 +57,12 @@ if __name__ == "__main__":
     skiprows = args.skiprows
     skip_y = args.skip
     
-    natom = [args.natom]*len(inputfile)
+    # natom = [args.natom]*len(inputfile)
+    if args.natom is not None:
+        # natom = [float(x) for x in args.natom.split(",")]
+        natom = [float(args.natom)]*len(inputfile)
+    else:
+        natom = [1.]*len(inputfile)
     
     x = []
     y = []
