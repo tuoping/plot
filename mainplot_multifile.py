@@ -89,25 +89,15 @@ if __name__ == "__main__":
     assignformat = generateformat(len(x)*num_y)
     if args.item is not None:
         num_y = len(item_col)-1
-<<<<<<< HEAD
         labellist = items[1:]
     else:
         num_y = len(header)
         labellist = [" " for i in range(len(y))]
-=======
-    else:
-        num_y = len(header)
-    labellist = args.INPUT
->>>>>>> 435e845659d287fd31a1f0e95ffcb326a496b9ad
     ptr = 0
     for i_file in range(len(x)):
         for i in range(num_y):
             form = assignformat[formatindicator]
-<<<<<<< HEAD
-            addline(x[i_file],y[i_file][i], form[ptr], None, formatindicator=formatindicator)
-=======
             addline(x[i_file],y[i_file][i], form[ptr], label=labellist[i_file], formatindicator=formatindicator)
->>>>>>> 435e845659d287fd31a1f0e95ffcb326a496b9ad
             ptr += 1
     
     maxxlist = []
@@ -146,7 +136,6 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-<<<<<<< HEAD
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
@@ -156,19 +145,6 @@ if __name__ == "__main__":
     else:
         if args.item is not None:
             setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
-=======
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-    if args.logx:
-        plt.semilogx()
-    if args.logy:
-        plt.semilogy()
-    if args.logy or args.logx:
-        setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]))
-    else:
-        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
-
->>>>>>> 435e845659d287fd31a1f0e95ffcb326a496b9ad
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
