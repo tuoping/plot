@@ -17,10 +17,10 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
     plt.ylabel(ylabel, fontsize = 16)
     plt.tick_params(direction="in")
 
-def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None):
+def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None, vmin=None, vmax=None):
     if formatindicator == "dot":
         # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=c,cmap="jet",s=1.0,marker=form["marker"], label=label)
+        plt.scatter(x,y,c=c,cmap="jet",s=1.0,marker=form["marker"], vmin=vmin,vmax=vmax, label=label)
         plt.colorbar()
         # plt.scatter(x,y,c=y,cmap="bwr",vmin=2.5,vmax=3.5 ,s=2.5, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
@@ -123,11 +123,13 @@ if __name__ == "__main__":
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
-    parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--natom", type=str, default="1", help="natom")
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
     parser.add_argument("--ymin", type=float, default=None, help="")
+    parser.add_argument("--vmin", type=float, default=None, help="")
+    parser.add_argument("--vmax", type=float, default=None, help="")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
     parser.add_argument("--legend", type=bool, default=False)
@@ -154,19 +156,26 @@ if __name__ == "__main__":
     num_y = len(items)-1
     skiprows = args.skiprows
     skip_y = args.skip
-    natom = [args.natom]*num_y
+    if len(args.natom.split(",")) == 1:
+        natom = [1.0, 1.0, float( args.natom)]
+    else:
+        natom = [float(x) for x in args.natom.split(",")]
+    print("natom = ", natom)
     
     
     fin = open(inputfile, "r")
     x, _y= readcontext(fin, item_col, skiprows=skiprows)
 
-    # x = x/1000000
+    x = x/natom[0]
     y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j]
+            y[j][i] = (_y[j][i] )/natom[j+1]
            
 
+    if len(y)==3:
+        # x = x-y[2]
+        y[0] = y[0]-y[2]
     print(x)
     print(y)
 
@@ -180,7 +189,7 @@ if __name__ == "__main__":
         num_y = len(header)
         labellist = [" " for i in range(len(y))]
     form = assignformat[formatindicator]
-    addline(x,y[0], form[0],labellist[0],formatindicator=formatindicator,c=y[1])
+    addline(x,y[0], form[0],labellist[0],formatindicator=formatindicator,c=y[1],vmin=args.vmin,vmax=args.vmax)
     
     if args.logx:
         plt.semilogx()
@@ -203,7 +212,7 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
 
     if args.item is not None:

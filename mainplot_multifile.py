@@ -57,12 +57,11 @@ if __name__ == "__main__":
     skiprows = args.skiprows
     skip_y = args.skip
     
-    # natom = [args.natom]*len(inputfile)
     if args.natom is not None:
-        # natom = [float(x) for x in args.natom.split(",")]
-        natom = [float(args.natom)]*len(inputfile)
+        natom = [float(x) for x in args.natom.split(",")]*len(inputfile)
     else:
-        natom = [1.]*len(inputfile)
+        natom = [1.]*num_y*len(inputfile)
+    print("natom = ", natom)
     
     x = []
     y = []
@@ -75,24 +74,26 @@ if __name__ == "__main__":
             item_col.append( header.index(i)-args.headerskip)
         print(item_col)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
-        x.append(x1)
+        x.append((x1-x1[0])/natom[0])
+        print(f)
+        print(y1)
         for i in range(len(y1[0])):
             for j in range(num_y):
-                y1[j][i] = (y1[j][i])/natom[idx_f]
-        print(f)
+                y1[j][i] = (y1[j][i])/natom[j+1]
         print(y1)
         y.append(y1)
         idx_f += 1
+
 
     startfig((5,5))
 
     assignformat = generateformat(len(x)*num_y)
     if args.item is not None:
         num_y = len(item_col)-1
-        labellist = items[1:]
+        labellist = items[1:]*len(x)
     else:
         num_y = len(header)
-        labellist = [" " for i in range(len(y))]
+        labellist = [" " for i in range(len(y))]*len(x)
     ptr = 0
     for i_file in range(len(x)):
         for i in range(num_y):
@@ -136,7 +137,7 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
     if args.logy:
