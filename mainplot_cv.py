@@ -20,7 +20,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None, vmin=None, vmax=None):
     if formatindicator == "dot":
         # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=c,cmap="jet",s=1.0,marker=form["marker"], vmin=vmin,vmax=vmax, label=label)
+        plt.scatter(x,y,c=c,cmap="jet",s=3.0,marker=form["marker"], vmin=vmin,vmax=vmax, label=label)
         plt.colorbar()
         # plt.scatter(x,y,c=y,cmap="bwr",vmin=2.5,vmax=3.5 ,s=2.5, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
@@ -174,7 +174,7 @@ if __name__ == "__main__":
            
 
     if len(y)==3:
-        # x = x-y[2]
+        x = x-y[2]
         y[0] = y[0]-y[2]
     print(x)
     print(y)

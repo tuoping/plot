@@ -18,7 +18,6 @@ if __name__ == "__main__":
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
     parser.add_argument('--headerskip', type=int, default=0, help='skip columes')
     parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
-    parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
     parser.add_argument('INPUT', type=str, nargs = "+",
@@ -52,7 +51,6 @@ if __name__ == "__main__":
     #     item_col.append( header.index(i)-args.headerskip)
     # print(item_col)
     
-    # num_y = args.num_y
     num_y = len(items)-1
     skiprows = args.skiprows
     skip_y = args.skip
@@ -60,7 +58,7 @@ if __name__ == "__main__":
     if args.natom is not None:
         natom = [float(x) for x in args.natom.split(",")]*len(inputfile)
     else:
-        natom = [1.]*num_y*len(inputfile)
+        natom = [1.]*num_y*len(inputfile)+[1.]
     print("natom = ", natom)
     
     x = []
@@ -74,7 +72,7 @@ if __name__ == "__main__":
             item_col.append( header.index(i)-args.headerskip)
         print(item_col)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
-        x.append((x1-x1[0])/natom[0])
+        x.append((x1)/natom[0])
         print(f)
         print(y1)
         for i in range(len(y1[0])):
@@ -120,13 +118,13 @@ if __name__ == "__main__":
     max_y = max(maxylist)
     min_y = min(minylist)
     if min_y > 0:
-        min_y = min_y*(0.95)
+        min_y = min_y*(0.98)
     else:
-        min_y = min_y*(1.05)
+        min_y = min_y*(1.02)
     if max_y > 0:
-        max_y = max_y*(1.05)
+        max_y = max_y*(1.02)
     else:
-        max_y = max_y*(0.95)
+        max_y = max_y*(0.98)
     if args.xmax is not None:
         max_x = args.xmax
     if args.xmin is not None:

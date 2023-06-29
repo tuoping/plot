@@ -3,33 +3,24 @@ from matplotlib.pyplot import cm
 import numpy as np
 
 def generateformat(n, singlecolor=False):
-    # colorlist = cm.rainbow(np.linspace(0, 1, n))
-    if n <= 4:
-        edgecolorlist = ["k", "r", "b", "g"]
-    else:
-        # edgecolorlist = cm.rainbow(np.linspace(0, 1, n))#["k", "r", "b", "g"]
-        edgecolorlist = cm.get_cmap("jet")
-    #if n > 1:
-    colorlist = edgecolorlist
-    #else:
-    # colorlist = ["w"]*n
     if singlecolor:
         colorlist = ["k"]*n
         edgecolorlist = colorlist
+    if n <= 4:
+        edgecolorlist = ["k", "r", "b", "g"]
+    else:
+        edgecolorlist = [cm.get_cmap("jet")(float(i)/float(n)) for i in range(n)]
+    
+    colorlist = deepcopy(edgecolorlist)
+    colorlist[4:] = ["w"]*(n-4)
 
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)
     dotformatlist = []
     for i in range(n):
-        if n > 4:
-            c = colorlist(float(i)/float(n))
-        else:
-            c = colorlist[i]
+        c = colorlist[i]
         dotformatlist.append({"c": c})
-        if n > 4:
-            ec = edgecolorlist(float(i)/float(n))
-        else:
-            ec = edgecolorlist[i]
+        ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
     for f in dotformatlist:
         f["marker"] = "o"
@@ -38,10 +29,7 @@ def generateformat(n, singlecolor=False):
     #lineformatlist = deepcopy(colorlist)
     lineformatlist = []
     for i in range(n):
-        if n > 4:
-            c = edgecolorlist(float(i)/float(n))
-        else:
-            c = edgecolorlist[i]
+        c = edgecolorlist[i]
         lineformatlist.append({"c": c})
     for f in lineformatlist:
         f["linestyle"]="-"

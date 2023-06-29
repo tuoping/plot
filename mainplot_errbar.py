@@ -57,20 +57,27 @@ def getmaxmin(data, dtype = float):
     min_data = np.reshape(tmpdata, [-1]).min()
     return max_data, min_data
 
-def readcontext(context, num_y=1, skip_y=0, skiprows=0):
+def readcontext(context, item_col, skiprows=1):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
-    x = c[0].astype(np.float)
-    y = c[skip_y+1:skip_y+num_y+1].astype(np.float)
+    x = c[item_col[0]].astype(float)
+    # x = np.arange(c.shape[1])
+    y = []
+    for i in item_col[1:]:
+        _y = c[i].astype(float)
+        y.append(_y)
+    y = np.array(y)
+    y[np.isnan(y)] = 0
+    y[np.isinf(y)] = 0
     return x,y
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Figure texts')
     parser.add_argument('--title', type=str, default='', help='titile of the figure')
-    parser.add_argument('--skip', type=int, default=0, help='skip columes')
     parser.add_argument('--skiprows', type=int, default=0, help="skip rows")
-    parser.add_argument('--num_y', type=int, default=1, help="number of y")
+    parser.add_argument('--headerskip', type=int, default=0, help='skip columes')
+    parser.add_argument("--item", type=str, default=None)
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
     parser.add_argument('INPUT', type=str, nargs = "+",
@@ -80,38 +87,42 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--singlecolor", type=bool, default=False, help="log scale of y axis")
-    parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--natom", type=str, default=None, help="natom")
     args = parser.parse_args()
     
     formatindicator = args.format
     
     inputfile = args.INPUT
+    if args.item is not None:
+        items = args.item.split(",")
+    else:
+        items = []
     
-    num_y = args.num_y
+    num_y = (len(items)-1)
     skiprows = args.skiprows
-    skip_y = args.skip
     
+    if args.natom is not None:
+        natom = [float(x) for x in args.natom.split(",")]*len(inputfile)
+    else:
+        natom = [1.]*num_y*len(inputfile)+[1.]
+    print("natom = ", natom)
     
+    skiprows = args.skiprows
     x = []
     y = []
     for f in inputfile:
         fin = open(f, "r")
-        x1, y1 = readcontext(fin, num_y=num_y*2, skip_y=skip_y, skiprows = skiprows)
-        x.append(x1)
-        for j in range(num_y):
-            for i in range(len(y1[j])):
-                y1[j][i] /= args.natom
-                y1[j][i] = np.abs(y1[j][i])
+        header = fin.readline().split()
+        item_col = []
+        for i in items:
+            item_col.append( header.index(i)-args.headerskip)
+        print(item_col)
+        x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
+        x.append((x1)/natom[0])
+        for i in range(len(y1[0])):
+            for j in range(num_y):
+                y1[j][i] = (y1[j][i])/natom[j+1]
         y.append(y1)
-    #fin = open(inputfile, "r")
-    #x, y = readcontext(fin, num_y=num_y*2, skip_y=skip_y, skiprows=skiprows)
-
-    
-    print(x)
-    print(y)
-    for yi in y:
-        print(yi)
-    print("\n")
     
     
     maxxlist = []
@@ -120,7 +131,7 @@ if __name__ == "__main__":
     minylist = []
     for i_file in range(len(x)):
         max_x, min_x = getmaxmin(x[i_file])
-        max_y, min_y = getmaxmin(y[i_file])
+        max_y, min_y = getmaxmin(y[i_file][0:int(num_y/2)])
         maxxlist.append(max_x)
         minxlist.append(min_x)
         maxylist.append(max_y)
@@ -131,12 +142,11 @@ if __name__ == "__main__":
     min_y = min(minylist)
     min_x = min_x # - 0.1 * (max_x-min_x)
     max_x = max_x # + 0.1 * (max_x-min_x)
-    min_y = min_y - 0.1 * (max_y-min_y)
-    max_y = max_y + 0.1 * (max_y-min_y)
-    min_y=0
+    min_y = min_y - 1.0 * (max_y-min_y)
+    max_y = max_y + 1.0 * (max_y-min_y)
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = np.arange(20,500,100)
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
     startfig((5,5))
 
@@ -150,9 +160,9 @@ if __name__ == "__main__":
     ptr = 0
     ecolor = ["grey", "pink","lightblue"]
     for i_file in range(len(inputfile)):
-        for i in range(num_y):
+        for i in range(int(num_y/2)):
             form = assignformat[formatindicator]
-            addline(x[i_file],y[i_file][i],y[i_file][i+num_y], form[ptr], labellist[ptr], formatindicator=formatindicator, ecolor = ecolor[i])
+            addline(x[i_file],y[i_file][i],y[i_file][i+int(num_y/2)], form[ptr], labellist[ptr], formatindicator=formatindicator, ecolor = ecolor[i])
             ptr += 1
     
     setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
@@ -166,6 +176,9 @@ if __name__ == "__main__":
     if args.logy:
         plt.semilogy()
     
-    plt.savefig("fig", dpi=1100, bbox_inches = "tight")
+    if args.item is not None:
+        plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
+    else:
+        plt.savefig("fig")
     plt.show()
     

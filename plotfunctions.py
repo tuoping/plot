@@ -62,7 +62,7 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 4)
+    xtickround = np.round(xtickList, 2)
     ytickround = np.round(ytickList, 4)
     # xtickround = xtickList
     # ytickround = ytickList
@@ -87,11 +87,11 @@ def getmaxmin(data, dtype = float):
 def readcontext(context, item_col, skiprows=1):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
-    x = c[item_col[0]].astype(np.float)
+    x = c[item_col[0]].astype(float)
     # x = np.arange(c.shape[1])
     y = []
     for i in item_col[1:]:
-        _y = c[i].astype(np.float)
+        _y = c[i].astype(float)
         y.append(_y)
     y = np.array(y)
     y[np.isnan(y)] = 0
@@ -105,7 +105,6 @@ if __name__ == "__main__":
     parser.add_argument('--skip', type=int, default=0, help='skip columes')
     parser.add_argument('--headerskip', type=int, default=0, help='skip columes')
     parser.add_argument('--skiprows', type=int, default=1, help="skip rows")
-    parser.add_argument('--num_y', type=int, default=1, help="number of y")
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
     parser.add_argument('INPUT', type=str,
@@ -115,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
-    parser.add_argument("--natom", type=float, default=1, help="natom")
+    parser.add_argument("--natom", type=str, default="1", help="natom")
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
@@ -140,21 +139,24 @@ if __name__ == "__main__":
         item_col.append( header.index(i)-args.headerskip)
     print(item_col)
     
-    # num_y = args.num_y
     num_y = len(items)-1
     skiprows = args.skiprows
     skip_y = args.skip
-    natom = [args.natom]*num_y
+    if len(args.natom.split(",")) == 1:
+        natom = [float( args.natom)]*len(items)
+    else:
+        natom = [float(x) for x in args.natom.split(",")]
+    print("natom = ", natom)
     
     
     fin = open(inputfile, "r")
     x, _y= readcontext(fin, item_col, skiprows=skiprows)
 
-    # x = x/1000000
+    x = x/natom[0]
     y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j]
+            y[j][i] = (_y[j][i] )/natom[j+1]
            
 
     print(x)
@@ -206,7 +208,7 @@ if __name__ == "__main__":
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
-        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="r")
+        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
     if args.item is not None:

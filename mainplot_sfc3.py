@@ -20,8 +20,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None):
     if formatindicator == "dot":
         # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=y,cmap="jet",vmin=3.5,vmax=5.0,s=10, marker=form["marker"], label=label)
-        # plt.scatter(x,y,c=y,cmap="bwr",vmin=2.5,vmax=3.5 ,s=2.5, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=y,cmap="jet",vmin=4.0,vmax=6.0,s=10, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
@@ -134,7 +133,8 @@ if __name__ == "__main__":
     
     args.format="dot"
     args.headerskip=2
-    args.item="time,sfc3"
+    args.item="time,SFpb_c3"
+    # args.item="time,sfc3"
 
     formatindicator = args.format
     
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     max_y, min_y = getmaxmin(y)
     #max_x = max_x + (max_x - min_x)*0.5
     #min_x = min_x - (max_x - min_x)*0.5
-    max_y=5
+    max_y=6
     min_y=1.5
     print((min_x, min_y))
     print((max_x, max_y))
