@@ -20,7 +20,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 def addline(x, y, form:dict, label=None, formatindicator="line-dot",c=None):
     if formatindicator == "dot":
         # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=y,cmap="jet",vmin=2.7,vmax=3.8,s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=y,cmap="jet",vmin=4.0,vmax=6.0,s=10, marker=form["marker"], label=label)
         # plt.scatter(x,y,c=y,cmap="bwr",vmin=1.5,vmax=2.5 ,s=2.5, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
@@ -134,7 +134,8 @@ if __name__ == "__main__":
     
     args.format="dot"
     args.headerskip=2
-    args.item="time,sf2h2"
+    args.item="time,SFpbc_h3"
+    # args.item="time,sf2h2"
 
     formatindicator = args.format
     
@@ -204,8 +205,8 @@ if __name__ == "__main__":
         max_y = args.ymax
     if args.ymin is not None:
         min_y = args.ymin
-    max_y=3.88
-    min_y=0.5
+    max_y=8
+    min_y=1.5
     print((min_x, min_y))
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
