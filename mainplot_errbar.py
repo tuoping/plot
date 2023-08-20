@@ -40,10 +40,9 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     plt.title(title)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 2)
-    plt.xticks( xtickround, fontsize = font['size'], fontname = "serif")
-    plt.yticks( ytickround, fontsize = font['size'], fontname = "serif")
+    xtickround = np.round(xtickList, 0)
+    plt.xticks(xtickround, fontsize = font['size'], fontname = "serif")
+    plt.yticks(fontsize = font['size'], fontname = "serif")
     if xlimit is not None:
         plt.xlim(xlimit)
     if ylimit is not None:
@@ -80,6 +79,10 @@ if __name__ == "__main__":
     parser.add_argument("--item", type=str, default=None)
     parser.add_argument('--xlabel', type=str, default="x", help="xlabel")
     parser.add_argument('--ylabel', type=str, default="y", help="ylabel")
+    parser.add_argument("--xmax", type=float, default=None, help="")
+    parser.add_argument("--xmin", type=float, default=None, help="")
+    parser.add_argument("--ymax", type=float, default=None, help="")
+    parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument('INPUT', type=str, nargs = "+",
                                  help="input file")
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
@@ -144,11 +147,20 @@ if __name__ == "__main__":
     max_x = max_x # + 0.1 * (max_x-min_x)
     min_y = min_y - 1.0 * (max_y-min_y)
     max_y = max_y + 1.0 * (max_y-min_y)
+    if args.xmax is not None:
+        max_x = args.xmax
+    if args.xmin is not None:
+        min_x = args.xmin
+    if args.ymax is not None:
+        max_y = args.ymax
+    if args.ymin is not None:
+        min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-    startfig((5,5))
+    # ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
+    ytickList = None
+    # startfig((6,4))
 
     # labellist = [" " for i in range(len(y))]
     # assignformat = generateformat(len(y), singlecolor=args.singlecolor)
@@ -165,7 +177,7 @@ if __name__ == "__main__":
             addline(x[i_file],y[i_file][i],y[i_file][i+int(num_y/2)], form[ptr], labellist[ptr], formatindicator=formatindicator, ecolor = ecolor[i])
             ptr += 1
     
-    setfigform(xtickList, ytickList, xlabel = args.xlabel, ylabel = args.ylabel, xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
+    setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title)
     # add diagonal line
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")

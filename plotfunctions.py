@@ -35,7 +35,7 @@ def startfig(size = (5,5)):
     plt.rcParams['xtick.major.width'] =2.0
     plt.rcParams['ytick.major.width'] =2.0
 
-def setfigform_simple(xlabel, ylabel):
+def setfigform_simple(xlabel, ylabel, xlimit = (None,None), ylimit = (None, None)):
     # plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
@@ -45,6 +45,8 @@ def setfigform_simple(xlabel, ylabel):
     }
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
+    plt.xlim(xlimit)
+    plt.ylim(ylimit)
     plt.xticks(fontsize = font['size'], fontname = "serif")
     plt.yticks(fontsize = font['size'], fontname = "serif")
     plt.tick_params(direction="in")
@@ -84,7 +86,7 @@ def getmaxmin(data, dtype = float):
     min_data = np.reshape(tmpdata, [-1]).min()
     return max_data, min_data
 
-def readcontext(context, item_col, skiprows=1):
+def readcontext(context, item_col, skiprows=None):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
     x = c[item_col[0]].astype(float)
@@ -115,6 +117,8 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default="1", help="natom")
+    parser.add_argument("--movey", type=float, default=0, help="natom")
+    parser.add_argument("--movex", type=float, default=0, help="natom")
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
@@ -158,9 +162,8 @@ if __name__ == "__main__":
         for i in range(y.shape[-1]):
             y[j][i] = (_y[j][i] )/natom[j+1]
            
-
-    print(x)
-    print(y)
+    x -= args.movex
+    y -= args.movey
 
     startfig((5,5))
 

@@ -11,11 +11,11 @@ from formatlist import generateformat
 from plotfunctions import addline, setfigform, getmaxmin, readcontext, startfig, setfigform_simple
 
 
-def readcontextrows(context, skip_y=0, skiprows=0):
-    c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
+def readcontextrows(context, cols, skiprows=0):
+    c_ = np.loadtxt(context, dtype="str", skiprows=skiprows).T
     if len(c_.shape) == 1:
-        c_ = c_[np.newaxis, :]
-    y = c_[np.arange(0, len(c_), skip_y)].astype(np.float)
+        c_ = c_[np.newaxis, :].T
+    y = c_[cols].astype(np.float).T
     return y
 
 if __name__ == "__main__":
@@ -54,20 +54,24 @@ if __name__ == "__main__":
     header.pop(0)
     header.pop(0)
     header.pop(0)
-    items = np.array([np.array(h.split("-")[-1]) for h in header[:-2]])
+    header_1 = [x for x in header if "_sfpbc.ds" in x]
+    col_1 = np.array([header.index(x)+2 for x in header if "_sfpbc.ds" in x])
+    print(header_1)
+    items = np.array([np.array(h.split("-")[-1]) for h in header_1])
     # items = np.array([np.array(h.split("-")[1]) for h in header])
     fin.close()
 
     x_sk = np.array([float(x) for x in items])
+    print(x_sk)
 
     
     y = []
     for i in range(len(inputfile)):
        fin = open(inputfile[i], "r")
-       y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
+       y_ = readcontextrows(fin, col_1, skiprows=skiprows)
        print(y_)
        for j in range(len(y_)):
-           y.append(y_[j][2:-2])
+           y.append(y_[j])
     y = np.array(y)
     time = y_.T[0]
     
