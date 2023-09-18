@@ -19,19 +19,11 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-<<<<<<< HEAD
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=30, marker=form["marker"], label=label)
-    elif formatindicator == "line-dot":
-        plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
-    elif formatindicator == "line":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], linewidth=3, label=label)
-=======
         plt.scatter(x,y,c=form["c"], alpha = form["alpha"], edgecolors=form["ec"], s=form["size"], marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
         plt.plot(x,y,c=form["c"], alpha = form["alpha"], linestyle=form["linestyle"], label=label)
->>>>>>> d9caf02d10b1268d5534660ac827ed642fc591a7
     elif formatindicator == "hist":
 	    plt.hist(x, y, align='mid',range=(0,1))
     elif formatindicator == "bar":
@@ -222,12 +214,8 @@ if __name__ == "__main__":
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")
-<<<<<<< HEAD
     if args.vertical_line is not None:
         plt.plot((args.vertical_line, args.vertical_line), (min_y, max_y), ls="--", c="k")
-=======
-    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
->>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
