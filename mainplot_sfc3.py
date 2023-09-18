@@ -19,12 +19,15 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None):
     if formatindicator == "dot":
-        # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=y,cmap="jet",vmin=4.0,vmax=6.0,s=10, marker=form["marker"], label=label)
+        from matplotlib.collections import LineCollection
+        from matplotlib.colors import ListedColormap,LinearSegmentedColormap
+        clist = ["k", "r"]
+        newcmap = LinearSegmentedColormap.from_list("k-r", clist)
+        plt.scatter(x,y,c=y,cmap=newcmap,vmin=10.0,vmax=10.5,s=3, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
+        plt.plot(x,y, linestyle=form["linestyle"], label=label)
     elif formatindicator == "hist":
 	    plt.hist(x, y, align='mid',range=(0,1))
     elif formatindicator == "bar":
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     
     args.format="dot"
     args.headerskip=2
-    args.item="time,SFpb_c3"
+    args.item="time,SF_c3"
     # args.item="time,sfc3"
 
     formatindicator = args.format
@@ -158,13 +161,11 @@ if __name__ == "__main__":
     
     
     fin = open(inputfile, "r")
-    x, _y= readcontext(fin, item_col, skiprows=skiprows)
+    x, y= readcontext(fin, item_col, skiprows=skiprows)
 
-    # x = x/1000000
-    y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j]
+            y[j][i] = (y[j][i] )/natom[j]
            
 
     print(x)
@@ -191,8 +192,8 @@ if __name__ == "__main__":
     max_y, min_y = getmaxmin(y)
     #max_x = max_x + (max_x - min_x)*0.5
     #min_x = min_x - (max_x - min_x)*0.5
-    max_y=6
-    min_y=1.5
+    max_y=12
+    min_y=2
     print((min_x, min_y))
     print((max_x, max_y))
     if args.horizontal_line is not None:
