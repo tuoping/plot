@@ -35,7 +35,7 @@ def startfig(size = (5,5)):
     plt.rcParams['xtick.major.width'] =2.0
     plt.rcParams['ytick.major.width'] =2.0
 
-def setfigform_simple(xlabel, ylabel):
+def setfigform_simple(xlabel, ylabel, xlimit = (None,None), ylimit = (None, None)):
     # plt.legend(fontsize = 16, frameon=False)
     font={'family':'serif',
           # 'style':'italic',  # 斜体
@@ -45,6 +45,8 @@ def setfigform_simple(xlabel, ylabel):
     }
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
+    plt.xlim(xlimit)
+    plt.ylim(ylimit)
     plt.xticks(fontsize = font['size'], fontname = "serif")
     plt.yticks(fontsize = font['size'], fontname = "serif")
     plt.tick_params(direction="in")
@@ -62,8 +64,8 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 1)
-    ytickround = np.round(ytickList, 2)
+    xtickround = np.round(xtickList, 2)
+    ytickround = np.round(ytickList, 4)
     # xtickround = xtickList
     # ytickround = ytickList
     print("ticks")
@@ -84,7 +86,7 @@ def getmaxmin(data, dtype = float):
     min_data = np.reshape(tmpdata, [-1]).min()
     return max_data, min_data
 
-def readcontext(context, item_col, skiprows=1):
+def readcontext(context, item_col, skiprows=None):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
     x = c[item_col[0]].astype(float)
@@ -116,6 +118,11 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default="1", help="natom")
+<<<<<<< HEAD
+=======
+    parser.add_argument("--movey", type=float, default=0, help="natom")
+    parser.add_argument("--movex", type=float, default=0, help="natom")
+>>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
@@ -159,9 +166,8 @@ if __name__ == "__main__":
         for i in range(y.shape[-1]):
             y[j][i] = (_y[j][i] )/natom[j+1]
            
-
-    print(x)
-    print(y)
+    x -= args.movex
+    y -= args.movey
 
     startfig((5,5))
 
@@ -210,8 +216,12 @@ if __name__ == "__main__":
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")
+<<<<<<< HEAD
     if args.vertical_line is not None:
         plt.plot((args.vertical_line, args.vertical_line), (min_y, max_y), ls="--", c="k")
+=======
+    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
+>>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
