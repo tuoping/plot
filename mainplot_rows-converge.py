@@ -11,10 +11,9 @@ from plotfunctions import addline, setfigform, getmaxmin, readcontext, startfig,
 def readcontextrows(context, skip_y=0, skiprows=0):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     if len(c_.shape) == 1:
-        c_ = c_[np.newaxis, :]
+        c_ = c_[np.newaxis, :].astype(np.float)
     y = [np.average(c_[-600:-400].astype(np.float), axis=0), np.average(c_[-400:-200].astype(np.float), axis=0), np.average(c_[-200:].astype(np.float), axis=0)]
-    # y = c_[::1]
-    return y
+    return y,c_
 
 if __name__ == "__main__":
 
@@ -50,21 +49,12 @@ if __name__ == "__main__":
     skip_y = args.skip
     
     
-    y = []
-    for i in range(len(inputfile)):
-       fin = open(inputfile[i], "r")
-       y_ = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
-       for i in range(len(y_)):
-           y.append(y_[i][1:])
-           # y.append(y_[i][-1])
+    fin = open(inputfile[0], "r")
+    y,c = readcontextrows(fin, skip_y=skip_y, skiprows=skiprows)
     y = np.array(y)
     x = np.loadtxt("Sk-kgrid1D.dat")[1:]*float(args.scalex)
     ordered_x = np.array(sorted(x))
     y_ref = args.s0/(1.+ordered_x*ordered_x*args.epsilon)
-    print("Shape of y = ", y.shape)
-    print("Shape of x = ", x.shape)
-    print("xdata: ",x)
-    print("ydata: ",y)
     
     
     startfig((5,5))
@@ -73,7 +63,7 @@ if __name__ == "__main__":
     assignformat = generateformat(len(y))
     for i in range(len(y)):
         form = assignformat[formatindicator]
-        addline(x,y[i],form[i],labellist[i],formatindicator=formatindicator)
+        addline(x,y[i][1:],form[i],labellist[i],formatindicator=formatindicator)
     
     setfigform_simple(xlabel = "k^2", ylabel = "Sk", xlimit = (args.xmin, args.xmax), ylimit = (args.ymin, args.ymax))
     # add diagonal line
@@ -89,3 +79,6 @@ if __name__ == "__main__":
     plt.savefig(inputfile[0][:-4], bbox_inches = "tight")
     plt.show()
     
+    selidx = np.array(np.where(x<0.002))+1
+    for idx in range(0,c.shape[0]-1,100):
+        print(idx, np.average(c[idx:idx+100, selidx[0]].astype(np.float)), np.std(c[idx:idx+100, selidx[0]].astype(np.float)))
