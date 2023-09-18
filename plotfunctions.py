@@ -19,11 +19,11 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=30, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
+        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], linewidth=3, label=label)
     elif formatindicator == "hist":
 	    plt.hist(x, y, align='mid',range=(0,1))
     elif formatindicator == "bar":
@@ -62,8 +62,8 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 4)
+    xtickround = np.round(xtickList, 1)
+    ytickround = np.round(ytickList, 2)
     # xtickround = xtickList
     # ytickround = ytickList
     print("ticks")
@@ -112,6 +112,7 @@ if __name__ == "__main__":
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
+    parser.add_argument("--vertical_line", type=float, default=None, help="Add vertical line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default="1", help="natom")
@@ -209,7 +210,8 @@ if __name__ == "__main__":
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")
-    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
+    if args.vertical_line is not None:
+        plt.plot((args.vertical_line, args.vertical_line), (min_y, max_y), ls="--", c="k")
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")

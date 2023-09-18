@@ -10,9 +10,9 @@ def generateformat(n, singlecolor=False):
         edgecolorlist = ["k", "r", "b", "g"]
     else:
         edgecolorlist = [cm.get_cmap("jet")(float(i)/float(n)) for i in range(n)]
-    
     colorlist = deepcopy(edgecolorlist)
     colorlist[4:] = ["w"]*(n-4)
+    
 
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)

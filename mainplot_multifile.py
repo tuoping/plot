@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
+    parser.add_argument("--vertical_line", type=float, default=None, help="Add vertical line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default=None, help="natom")
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     skip_y = args.skip
     
     if args.natom is not None:
-        natom = [float(x) for x in args.natom.split(",")]*len(inputfile)
+        natom = [float(x) for x in args.natom.split(",")]
     else:
         natom = [1.]*num_y*len(inputfile)+[1.]
     print("natom = ", natom)
@@ -70,15 +71,11 @@ if __name__ == "__main__":
         item_col = []
         for i in items:
             item_col.append( header.index(i)-args.headerskip)
-        print(item_col)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
         x.append((x1)/natom[0])
-        print(f)
-        print(y1)
         for i in range(len(y1[0])):
             for j in range(num_y):
-                y1[j][i] = (y1[j][i])/natom[j+1]
-        print(y1)
+                y1[j][i] = (y1[j][i])/natom[idx_f+1]
         y.append(y1)
         idx_f += 1
 
@@ -135,7 +132,7 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
+    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
     if args.logy:
@@ -148,7 +145,9 @@ if __name__ == "__main__":
     if args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
-        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="r")
+        plt.axhline(args.horizontal_line)
+    if args.vertical_line is not None:
+        plt.axvline(args.vertical_line)
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
     
     if args.item is not None:
