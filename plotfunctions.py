@@ -19,17 +19,17 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 
 def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
     if formatindicator == "dot":
-        plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
+        plt.scatter(x,y,c=form["c"], alpha = form["alpha"], edgecolors=form["ec"], s=form["size"], marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
         plt.plot(x,y,c=form["ec"], linestyle=form["linestyle"], marker=form["marker"], markerfacecolor=form["c"], markersize=5, label=label)
     elif formatindicator == "line":
-        plt.plot(x,y,c=form["c"], linestyle=form["linestyle"], label=label)
+        plt.plot(x,y,c=form["c"], alpha = form["alpha"], linestyle=form["linestyle"], label=label)
     elif formatindicator == "hist":
 	    plt.hist(x, y, align='mid',range=(0,1))
     elif formatindicator == "bar":
 	    plt.bar(x, y)
 
-def startfig(size = (5,5)):
+def startfig(size):
     plt.rcParams["figure.figsize"] = size
     plt.rcParams['axes.linewidth'] =2.0
     plt.rcParams['xtick.major.width'] =2.0
@@ -95,7 +95,7 @@ def readcontext(context, item_col, skiprows=None):
     for i in item_col[1:]:
         _y = c[i].astype(float)
         y.append(_y)
-    y = np.array(y)
+    y = np.reshape(y, [len(item_col)-1,-1])
     y[np.isnan(y)] = 0
     y[np.isinf(y)] = 0
     return x,y
@@ -154,14 +154,13 @@ if __name__ == "__main__":
     
     
     fin = open(inputfile, "r")
-    x, _y= readcontext(fin, item_col, skiprows=skiprows)
+    x, y= readcontext(fin, item_col, skiprows=skiprows)
 
     x = x/natom[0]
-    y = deepcopy(_y)
     for j in range(num_y):
         for i in range(y.shape[-1]):
-            y[j][i] = (_y[j][i] )/natom[j+1]
-           
+            y[j][i] = (y[j][i] )/natom[j+1]
+              
     x -= args.movex
     y -= args.movey
 
@@ -203,6 +202,8 @@ if __name__ == "__main__":
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
+    # xtickList = np.arange(2,14,2)
+    # ytickList = np.arange(0,7,1)
 
     if args.item is not None:
         if not args.logy and not args.logx:

@@ -54,8 +54,8 @@ if __name__ == "__main__":
     header.pop(0)
     header.pop(0)
     header.pop(0)
-    header_1 = [x for x in header if "_sfpbc.ds" in x]
-    col_1 = np.array([header.index(x)+2 for x in header if "_sfpbc.ds" in x])
+    header_1 = [x for x in header if "sf.ds" in x]
+    col_1 = np.array([header.index(x)+2 for x in header if "sf.ds" in x])
     print(header_1)
     items = np.array([np.array(h.split("-")[-1]) for h in header_1])
     # items = np.array([np.array(h.split("-")[1]) for h in header])

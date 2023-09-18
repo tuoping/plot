@@ -12,7 +12,7 @@ def generateformat(n, singlecolor=False):
         edgecolorlist = [cm.get_cmap("jet")(float(i)/float(n)) for i in range(n)]
     
     colorlist = deepcopy(edgecolorlist)
-    colorlist[4:] = ["w"]*(n-4)
+    # colorlist[4:] = ["w"]*(n-4)
 
     #dotformatlist
     #dotformatlist = deepcopy(colorlist)
@@ -22,6 +22,8 @@ def generateformat(n, singlecolor=False):
         dotformatlist.append({"c": c})
         ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
+        dotformatlist[-1]["alpha"] = float(n-i)/n
+        dotformatlist[-1]["size"] = float(n-i)/n*5
     for f in dotformatlist:
         f["marker"] = "o"
     
@@ -31,6 +33,7 @@ def generateformat(n, singlecolor=False):
     for i in range(n):
         c = edgecolorlist[i]
         lineformatlist.append({"c": c})
+        lineformatlist[-1]["alpha"] = float(n-i)/n
     for f in lineformatlist:
         f["linestyle"]="-"
     
