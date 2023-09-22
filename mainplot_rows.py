@@ -71,11 +71,7 @@ if __name__ == "__main__":
        y_ = readcontextrows(fin, col_1, skiprows=skiprows)
        print(y_)
        for j in range(len(y_)):
-<<<<<<< HEAD
-           y.append(y_[j][2:-2])
-=======
            y.append(y_[j])
->>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
     y = np.array(y)
     time = y_.T[0]
     
