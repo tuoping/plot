@@ -73,18 +73,9 @@ if __name__ == "__main__":
             item_col.append( header.index(i)-args.headerskip)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
         x.append((x1)/natom[0])
-<<<<<<< HEAD
         for i in range(len(y1[0])):
             for j in range(num_y):
                 y1[j][i] = (y1[j][i])/natom[idx_f+1]
-=======
-        print(f)
-        for i in range(len(y1[0])):
-            for j in range(num_y):
-                y1[j][i] = (y1[j][i])/natom[j+1]
-        print(x1)
-        print(y1)
->>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
         y.append(y1)
         idx_f += 1
 
@@ -103,7 +94,6 @@ if __name__ == "__main__":
             addline(x[i_file],y[i_file][i], form[ptr], label=labellist[i_file], formatindicator=formatindicator)
             ptr += 1
     
-<<<<<<< HEAD
     maxxlist = []
     minxlist = []
     maxylist = []
@@ -142,8 +132,6 @@ if __name__ == "__main__":
     print((max_x, max_y))
     xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
     ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
-=======
->>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
 
     if args.logy:
         if args.item is not None:
@@ -156,16 +144,10 @@ if __name__ == "__main__":
     if args.diagonal_line:
         plt.plot((args.xmin, args.xmax), (args.ymin, args.ymax), ls="--", c="k")
     if args.horizontal_line is not None:
-<<<<<<< HEAD
         plt.axhline(args.horizontal_line)
     if args.vertical_line is not None:
         plt.axvline(args.vertical_line)
     # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
-=======
-        min_x = np.min([np.min(x[i]) for i in range(len(inputfile))])
-        max_x = np.max([np.max(x[i]) for i in range(len(inputfile))])
-        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="grey")
->>>>>>> 2f4bc4d2f9712cc361634a42e3ca3075e6b64b03
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
