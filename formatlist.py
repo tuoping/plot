@@ -4,12 +4,13 @@ import numpy as np
 
 def generateformat(n, singlecolor=False):
     if singlecolor:
-        colorlist = ["k"]*n
+        colorlist = ["b"]*n
         edgecolorlist = colorlist
     if n <= 4:
-        edgecolorlist = ["k", "r", "b", "g"]
+        edgecolorlist = ["b", "r", "k", "g"]
     else:
-        edgecolorlist = [cm.get_cmap("jet")(float(i)/float(n)) for i in range(n)]
+        # edgecolorlist = [cm.get_cmap("Dark2")(float(i)/float(n)) for i in range(n)]
+        edgecolorlist = [cm.get_cmap("gist_ncar")(float(i)/float(n)) for i in range(n)]
     colorlist = deepcopy(edgecolorlist)
     colorlist[4:] = ["w"]*(n-4)
     
@@ -22,8 +23,9 @@ def generateformat(n, singlecolor=False):
         dotformatlist.append({"c": c})
         ec = edgecolorlist[i]
         dotformatlist[-1]["ec"] = ec
-        dotformatlist[-1]["alpha"] = float(n-i)/n
-        dotformatlist[-1]["size"] = float(n-i)/n*5
+        # dotformatlist[-1]["alpha"] = float(n-i)/n
+        dotformatlist[-1]["alpha"] = 1.
+        dotformatlist[-1]["size"] = float(n-i)/n*3
     for f in dotformatlist:
         f["marker"] = "o"
     
@@ -33,7 +35,8 @@ def generateformat(n, singlecolor=False):
     for i in range(n):
         c = edgecolorlist[i]
         lineformatlist.append({"c": c})
-        lineformatlist[-1]["alpha"] = float(n-i)/n
+        # lineformatlist[-1]["alpha"] = float(n-i)/n
+        lineformatlist[-1]["alpha"] = 1
     for f in lineformatlist:
         f["linestyle"]="-"
     

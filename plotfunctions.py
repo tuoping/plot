@@ -30,7 +30,8 @@ def addline(x, y, form:dict, label=None, formatindicator="line-dot"):
 	    plt.bar(x, y)
 
 def startfig(size):
-    plt.rcParams["figure.figsize"] = size
+    if size is not None:
+        plt.rcParams["figure.figsize"] = size
     plt.rcParams['axes.linewidth'] =2.0
     plt.rcParams['xtick.major.width'] =2.0
     plt.rcParams['ytick.major.width'] =2.0
@@ -50,10 +51,11 @@ def setfigform_simple(xlabel, ylabel, xlimit = (None,None), ylimit = (None, None
     plt.xticks(fontsize = font['size'], fontname = "serif")
     plt.yticks(fontsize = font['size'], fontname = "serif")
     plt.tick_params(direction="in")
+    plt.ticklabel_format(style="sci")
 
 def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, ylimit=None, legend = False):
     if legend:
-        plt.legend(fontsize = 16, frameon=False)
+        plt.legend(fontsize = 16, frameon=False,loc='center left', bbox_to_anchor=(1, 0.5))
     font={'family':'serif',
           # 'style':'italic',  # 斜体
           'weight':'normal',
@@ -64,13 +66,14 @@ def setfigform(xtickList, ytickList, xlabel, ylabel, title = "", xlimit = None, 
     print("labels:",xlabel,ylabel)
     plt.xlabel(xlabel, fontdict = font)
     plt.ylabel(ylabel, fontdict = font)
-    xtickround = np.round(xtickList, 2)
-    ytickround = np.round(ytickList, 4)
-    # xtickround = xtickList
-    # ytickround = ytickList
+    # xtickround = np.round(xtickList, 2)
+    # ytickround = np.round(ytickList, 4)
+    xtickround = xtickList
+    ytickround = ytickList
     print("ticks")
     print(xtickround)
     print(ytickround)
+    plt.ticklabel_format(style="sci")
     plt.xticks( xtickround, fontsize = font['size'], fontname = "serif")
     plt.yticks( ytickround, fontsize = font['size'], fontname = "serif")
     if xlimit is not None:
@@ -95,9 +98,10 @@ def readcontext(context, item_col, skiprows=None):
     for i in item_col[1:]:
         _y = c[i].astype(float)
         y.append(_y)
-    y = np.reshape(y, [len(item_col)-1,-1])
-    y[np.isnan(y)] = 0
-    y[np.isinf(y)] = 0
+    if len(y) > 0:
+        y = np.reshape(y, [len(item_col)-1,-1])
+        y[np.isnan(y)] = 0
+        y[np.isinf(y)] = 0
     return x,y
 
 if __name__ == "__main__":
@@ -127,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
     parser.add_argument("--legend", type=bool, default=False)
+    parser.add_argument("--reproduce", type=bool, default=False)
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -139,6 +144,7 @@ if __name__ == "__main__":
     else:
         items = []
     item_col = []
+    print(header)
     for i in items:
         print(i, header.index(i))
         item_col.append( header.index(i)-args.headerskip)
@@ -157,15 +163,20 @@ if __name__ == "__main__":
     fin = open(inputfile, "r")
     x, y= readcontext(fin, item_col, skiprows=skiprows)
 
-    x = x/natom[0]
-    for j in range(num_y):
-        for i in range(y.shape[-1]):
-            y[j][i] = (y[j][i] )/natom[j+1]
+    if len(item_col) == 1:
+        y = x/natom[0]
+        x = np.arange(len(y))
+    else:
+       x = x/natom[0]
+       for j in range(num_y):
+           for i in range(y.shape[-1]):
+               y[j][i] = (y[j][i] )/natom[j+1]
               
+    # x = np.arange(len(x))
     x -= args.movex
     y -= args.movey
 
-    startfig((5,5))
+    startfig(None)
 
     assignformat = generateformat(len(y), singlecolor=args.singlecolor)
     if args.item is not None:
@@ -184,9 +195,9 @@ if __name__ == "__main__":
         plt.semilogy()
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
-    #max_x = max_x + (max_x - min_x)*0.5
-    #min_x = min_x - (max_x - min_x)*0.5
+    print("Min(x), Min(y)")
     print((min_x, min_y))
+    print("Max(x), Max(y)")
     print((max_x, max_y))
     if args.horizontal_line is not None:
         min_y = min(min_y, args.horizontal_line)
@@ -199,18 +210,24 @@ if __name__ == "__main__":
         max_y = args.ymax
     if args.ymin is not None:
         min_y = args.ymin
-    print((min_x, min_y))
-    print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
-    # xtickList = np.arange(2,14,2)
-    # ytickList = np.arange(0,7,1)
+    max_all = max(max_x, max_y)
+    min_all = min(min_x, min_y)
+    if args.reproduce:
+        xtickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.4) + min_all
+        ytickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.4) + min_all
+    else:
+        xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
+        ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.4) + min_y
 
     if args.item is not None:
-        if not args.logy and not args.logx:
+        if not args.logy and not args.logx and args.reproduce:
+            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_all,max_all), ylimit=(min_all,max_all), title = args.title, legend = args.legend)
+        elif not args.logy and not args.logx : 
             setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
     # add diagonal line
-    if args.diagonal_line:
+    if args.reproduce:
+        plt.plot((min_all, max_all), (min_all, max_all), ls="--", c="k")
+    elif args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
         plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")

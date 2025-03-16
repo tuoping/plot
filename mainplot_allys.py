@@ -82,9 +82,10 @@ def getmaxmin(data, dtype = float):
 def readcontext(context, num_y=1, skip_y=0, skiprows=0):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
+    if len(c.shape) == 1:
+        c = c.reshape([1,-1])
     x = np.arange(len(c[0]))
-    #x = c[0].astype(np.float)
-    y = c[skip_y:skip_y+num_y].astype(np.float)
+    y = c[skip_y:skip_y+num_y].astype(float)
     return x,y
 
 if __name__ == "__main__":
@@ -102,6 +103,8 @@ if __name__ == "__main__":
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
+    parser.add_argument("--ymax", type=float, default=None, help="")
+    parser.add_argument("--ymin", type=float, default=None, help="")
     parser.add_argument("--natom", type=float, default=1, help="natom")
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     args = parser.parse_args()
@@ -121,10 +124,13 @@ if __name__ == "__main__":
     for i in range(len(y[0])):
         for j in range(num_y):
             y[j][i] /= args.natom
-    print(y)
 
     max_x, min_x = getmaxmin(x)
     max_y, min_y = getmaxmin(y)
+    if args.ymax is not None:
+        max_y=args.ymax
+    if args.ymin is not None:
+        min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
     # min_x = 50

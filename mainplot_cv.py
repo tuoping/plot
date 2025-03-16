@@ -20,7 +20,7 @@ def drawHist(heights,bounds=None, hnum=20,xlabel="x", ylabel="y",title=""):
 def addline(x, y, form:dict, label=None, formatindicator="line-dot", c=None, vmin=None, vmax=None):
     if formatindicator == "dot":
         # plt.scatter(x,y,c=form["c"], edgecolors=form["ec"], s=10, marker=form["marker"], label=label)
-        plt.scatter(x,y,c=c,cmap="jet",s=3.0,marker=form["marker"], vmin=vmin,vmax=vmax, label=label)
+        plt.scatter(x,y,c=c,cmap="gnuplot",s=5.0,marker=form["marker"], vmin=vmin,vmax=vmax, label=label)
         plt.colorbar()
         # plt.scatter(x,y,c=y,cmap="bwr",vmin=2.5,vmax=3.5 ,s=2.5, marker=form["marker"], label=label)
     elif formatindicator == "line-dot":
@@ -90,10 +90,10 @@ def getmaxmin(data, dtype = float):
 def readcontext(context, item_col, skiprows=1):
     c_ = np.loadtxt(context, dtype="str", skiprows=skiprows)
     c = np.transpose(c_)
-    x = c[item_col[0]].astype(np.float)
+    x = np.array(c[item_col[0]], dtype=float)
     y = []
     for i in item_col[1:]:
-        _y = c[i].astype(np.float)
+        _y = c[i]
         y.append(_y)
     '''
     x = np.arange(0, len(c), 1)
@@ -101,9 +101,7 @@ def readcontext(context, item_col, skiprows=1):
     y = [c[x].astype(np.float)]
     print("y = ",y)
     '''
-    y = np.array(y)
-    y[np.isnan(y)] = 0
-    y[np.isinf(y)] = 0
+    y = np.array(y, dtype=float)
     return x,y
 
 if __name__ == "__main__":
@@ -121,6 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('--format', type=str, default='line-dot', help="Format of plots: line, line-dot, dot")
     parser.add_argument("--diagonal_line", type=bool, default=False, help="Add diagonal line")
     parser.add_argument("--horizontal_line", type=float, default=None, help="Add horizontal line")
+    parser.add_argument("--vertical_line", type=float, default=None, help="Add vertical line")
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default="1", help="natom")
@@ -133,10 +132,10 @@ if __name__ == "__main__":
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
     parser.add_argument("--legend", type=bool, default=False)
+    parser.add_argument("--reproduce", type=bool, default=False)
     args = parser.parse_args()
     
     args.format="dot"
-    args.headerskip=2
 
     formatindicator = args.format
     
@@ -173,9 +172,6 @@ if __name__ == "__main__":
             y[j][i] = (_y[j][i] )/natom[j+1]
            
 
-    if len(y)==3:
-        x = x-y[2]
-        y[0] = y[0]-y[2]
     print(x)
     print(y)
 
@@ -212,18 +208,29 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.1) + min_y
+    max_all = max(max_x, max_y)
+    min_all = min(min_x, min_y)
+    if args.reproduce:
+        xtickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.2) + min_all
+        ytickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.2) + min_all
+    else:
+        xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
+        ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
 
     if args.item is not None:
-        setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
-    # setfigform_simple(xlabel = args.xlabel, ylabel = args.ylabel)
+        if not args.logy and not args.logx and args.reproduce:
+            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_all,max_all), ylimit=(min_all,max_all), title = args.title, legend = args.legend)
+        elif not args.logy and not args.logx : 
+            setfigform(xtickList, ytickList, xlabel = items[0], ylabel = ",".join(items[1:]), xlimit=(min_x,max_x), ylimit=(min_y,max_y), title = args.title, legend = args.legend)
     # add diagonal line
-    if args.diagonal_line:
+    if args.reproduce:
+        plt.plot((min_all, max_all), (min_all, max_all), ls="--", c="k")
+    elif args.diagonal_line:
         plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
-        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="r")
-    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
+        plt.plot((min_x, max_x), (args.horizontal_line, args.horizontal_line), ls="--", c="k")
+    if args.vertical_line is not None:
+        plt.plot((args.vertical_line, args.vertical_line), (min_y, max_y), ls="--", c="k")
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")

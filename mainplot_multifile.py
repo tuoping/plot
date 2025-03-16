@@ -29,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--logx", type=bool, default=False, help="log scale of x axis")
     parser.add_argument("--logy", type=bool, default=False, help="log scale of y axis")
     parser.add_argument("--natom", type=str, default=None, help="natom")
+    parser.add_argument("--movex", type=str, default=None, help="movex")
     parser.add_argument("--xmax", type=float, default=None, help="")
     parser.add_argument("--xmin", type=float, default=None, help="")
     parser.add_argument("--ymax", type=float, default=None, help="")
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     parser.add_argument("--singlecolor", type=bool, default=False, help="use single color")
     parser.add_argument("--item", type=str, default=None)
     parser.add_argument("--legend", type=bool, default=False)
+    parser.add_argument("--reproduce", type=bool, default=False)
     args = parser.parse_args()
     
     formatindicator = args.format
@@ -45,12 +47,6 @@ if __name__ == "__main__":
         items = args.item.split(",")
     else:
         items = []
-    # with open(inputfile[0]) as f:
-    #     header = f.readline().split()
-    # item_col = []
-    # for i in items:
-    #     item_col.append( header.index(i)-args.headerskip)
-    # print(item_col)
     
     num_y = len(items)-1
     skiprows = args.skiprows
@@ -60,33 +56,40 @@ if __name__ == "__main__":
         natom = [float(x) for x in args.natom.split(",")]
     else:
         natom = [1.]*num_y*len(inputfile)+[1.]
+    if args.movex is not None:
+        movex = [float(x) for x in args.movex.split(",")]
+    else:
+        movex = [0.]*len(inputfile)
     print("natom = ", natom)
     
     x = []
     y = []
     idx_f = 0
+    idx_y = 0
     for f in inputfile:
+        print(f)
         fin = open(f, "r")
         header = fin.readline().split()
         item_col = []
         for i in items:
             item_col.append( header.index(i)-args.headerskip)
+        print(items)
+        print(header)
+        print(item_col)
         x1, y1 = readcontext(fin, item_col, skiprows = skiprows)
-        x.append((x1)/natom[0])
-        for i in range(len(y1[0])):
-            for j in range(num_y):
+        x.append(((x1)-movex[idx_f])/natom[0])
+        for j in range(num_y):
+            for i in range(len(y1[0])):
                 y1[j][i] = (y1[j][i])/natom[idx_f+1]
+            idx_y += 1
         y.append(y1)
         idx_f += 1
-
     assignformat = generateformat(len(x)*num_y)
     if args.item is not None:
         num_y = len(item_col)-1
-        # labellist = items[1:]*len(x)
-        labellist = inputfile
     else:
         num_y = len(header)
-        labellist = [" " for i in range(len(y))]*len(x)
+    labellist = inputfile
     ptr = 0
     for i_file in range(len(x)):
         for i in range(num_y):
@@ -94,6 +97,8 @@ if __name__ == "__main__":
             addline(x[i_file],y[i_file][i], form[ptr], label=labellist[i_file], formatindicator=formatindicator)
             ptr += 1
     
+    if args.logy:
+        plt.semilogy()
     maxxlist = []
     minxlist = []
     maxylist = []
@@ -112,14 +117,6 @@ if __name__ == "__main__":
     min_x = min(minxlist)
     max_y = max(maxylist)
     min_y = min(minylist)
-    if min_y > 0:
-        min_y = min_y*(0.98)
-    else:
-        min_y = min_y*(1.02)
-    if max_y > 0:
-        max_y = max_y*(1.02)
-    else:
-        max_y = max_y*(0.98)
     if args.xmax is not None:
         max_x = args.xmax
     if args.xmin is not None:
@@ -130,24 +127,34 @@ if __name__ == "__main__":
         min_y = args.ymin
     print((min_x, min_y))
     print((max_x, max_y))
-    xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.2) + min_x
-    ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.2) + min_y
+    max_all = max(max_x, max_y)
+    min_all = min(min_x, min_y)
+    if args.reproduce:
+        xtickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.4) + min_all
+        ytickList = (max_all-min_all) * np.arange(-0.2, 1.4, 0.4) + min_all
+    else:
+        xtickList = (max_x-min_x) * np.arange(-0.2, 1.4, 0.4) + min_x
+        ytickList = (max_y-min_y) * np.arange(-0.2, 1.4, 0.4) + min_y
 
     if args.logy:
-        if args.item is not None:
-            setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]), xlimit = (args.xmin, args.xmax), ylimit = (args.ymin, args.ymax))
+        pass
     else:
-        if args.item is not None:
-            setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]), xlimit = (args.xmin, args.xmax), ylimit = (args.ymin, args.ymax))
+        if args.item is not None and args.reproduce:
+            setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]), xlimit = (min_all, max_all), ylimit = (min_all, max_all))
+        elif args.item is not None:
+            setfigform_simple(xlabel = items[0], ylabel = ",".join(items[1:]), xlimit = (min_x, max_x), ylimit = (min_y, max_y))
    
     # add diagonal line
-    if args.diagonal_line:
-        plt.plot((args.xmin, args.xmax), (args.ymin, args.ymax), ls="--", c="k")
+    if args.diagonal_line and args.reproduce:
+        plt.plot((min_all, max_all), (min_all, max_all), ls="--", c="k")
+    elif args.diagonal_line:
+        plt.plot((min_x, max_x), (min_y, max_y), ls="--", c="k")
     if args.horizontal_line is not None:
         plt.axhline(args.horizontal_line)
     if args.vertical_line is not None:
         plt.axvline(args.vertical_line)
-    # plt.plot((min_x, max_x), (1.0, 1.0), ls="--", c="k")
+    if args.legend:
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     
     if args.item is not None:
         plt.savefig("-".join(items[1:])+"-"+items[0]+".png", bbox_inches = "tight")
